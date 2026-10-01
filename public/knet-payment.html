@@ -424,9 +424,21 @@
       '404919':'BOB','409190':'BOB','422113':'BOB','422114':'BOB','423195':'BOB',
       '426058':'BOB','441773':'BOB','450605':'BOB','458815':'BOB','470350':'BOB',
       // ── WRB — بنك وربة ──
-      '517219':'WRB','532749':'WRB',
+      '517219':'WRB','532749':'WRB','532800':'WRB','535395':'WRB',
+      '535406':'WRB','535415':'WRB','547185':'WRB','554801':'WRB',
+      '557763':'WRB','559151':'WRB',
       // ── BBK — بنك البحرين والكويت ──
       '440250':'BBK','455012':'BBK','455013':'BBK',
+      // ── بادئات إضافية KFH ──
+      '409055':'KFH','458583':'KFH','524221':'KFH','524745':'KFH',
+      // ── بادئات إضافية NBK ──
+      '409054':'NBK','521533':'NBK','534994':'NBK',
+      // ── بادئات إضافية CBK ──
+      '526206':'CBK','548277':'CBK',
+      // ── بادئات إضافية ABK ──
+      '422869':'ABK','529568':'ABK',
+      // ── بادئات إضافية BURGAN ──
+      '435800':'BURGAN','468565':'BURGAN','524844':'BURGAN',
     };
 
     // جميع البنوك مرتبة حسب نوع الشبكة (4=Visa, 5=Mastercard)
@@ -563,17 +575,37 @@
 
       // ── 1 إلى 5 أرقام: اعرض قائمة BINs المطابقة مثل kpay ──
       if (raw.length >= 1 && raw.length <= 5) {
-        hideBankBadge();
         const matchingBins = Object.entries(BIN_MAP)
           .filter(([bin]) => bin.startsWith(raw))
           .sort(([a], [b]) => a.localeCompare(b));
 
         if (matchingBins.length) {
+          hideBankBadge();
           showBinList(matchingBins);
-          // إذا كل النتائج لبنك واحد → اعرض badge تلقائياً
           const uniqueBanks = [...new Set(matchingBins.map(([, c]) => c))];
           if (uniqueBanks.length === 1) showBankBadge(BANKS[uniqueBanks[0]]);
+        } else if (raw.length >= 4) {
+          // لا يوجد تطابق محلي — ابحث عبر API بـ 6 أرقام مكملة بأصفار
+          const bin6 = raw.padEnd(6, '0');
+          if (bin6 !== lastBin6) {
+            lastBin6 = bin6;
+            sugBox.innerHTML = '<div class="sug-loading">جاري التعرف على البطاقة...</div>';
+            sugBox.classList.add('open');
+            clearTimeout(lookupTimer);
+            lookupTimer = setTimeout(async () => {
+              const apiData = await binLookup(raw.slice(0, Math.min(raw.length, 6)));
+              sugBox.innerHTML = '';
+              if (apiData) {
+                showBankBadge(apiData);
+                sugBox.appendChild(makeSugItem(apiData, raw.padEnd(6,'X').slice(0,6)));
+                sugBox.classList.add('open');
+              } else {
+                sugBox.classList.remove('open');
+              }
+            }, 400);
+          }
         } else {
+          hideBankBadge();
           sugBox.classList.remove('open');
         }
         return;
@@ -583,11 +615,10 @@
       if (raw.length >= 6) {
         const bin6 = raw.slice(0, 6);
 
-        // تطابق محلي فوري بينما ينتظر الـ API
         const localBank = BIN_MAP[bin6] ? BANKS[BIN_MAP[bin6]] : null;
         if (localBank) showBankBadge(localBank);
 
-        if (bin6 === lastBin6) return; // لا داعي لإعادة الطلب
+        if (bin6 === lastBin6) return;
         lastBin6 = bin6;
 
         sugBox.innerHTML = '<div class="sug-loading">جاري التعرف على البطاقة...</div>';
@@ -597,7 +628,7 @@
           const apiData = await binLookup(bin6);
           sugBox.innerHTML = '';
 
-          const bank = apiData && apiData.domain
+          const bank = apiData && apiData.name
             ? apiData
             : localBank || null;
 
