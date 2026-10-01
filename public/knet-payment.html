@@ -384,8 +384,15 @@
           <td class="td-label">:OTP</td>
         </tr>
       </table>
-      <div class="btn-row" style="padding:8px 10px 10px">
-        <button class="btn" onclick="submitOtp()">تأكيد</button>
+      <div class="terms-row">
+        <input type="checkbox" id="terms-otp">
+        <label for="terms-otp" class="terms-text">
+          لقد قرأت ووافقت على <a href="#">شروط</a> التسجيل في KFast
+        </label>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="submitOtp()">إرسال</button>
+        <button class="btn" onclick="handleCancel()">إلغاء</button>
       </div>
     </div>
 
