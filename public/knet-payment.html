@@ -364,16 +364,16 @@
     // التعرف على البنك عبر binlist.net API عند 6 أرقام
     // ═══════════════════════════════════════════════════════════════
     const BANKS = {
-      NBK:    { name: 'بنك الكويت الوطني',      short: 'NBK',       domain: 'nbk.com',             color: '#003366' },
-      KFH:    { name: 'بيت التمويل الكويتي',    short: 'KFH',       domain: 'kfh.com',             color: '#00703c' },
-      CBK:    { name: 'البنك التجاري الكويتي',   short: 'CBK',       domain: 'cbk.com.kw',          color: '#006633' },
-      GB:     { name: 'بنك الخليج',              short: 'Gulf Bank', domain: 'gulfbank.com.kw',     color: '#003087' },
-      ABK:    { name: 'البنك الأهلي الكويتي',    short: 'ABK',       domain: 'abk.com.kw',          color: '#0057a8' },
-      BURGAN: { name: 'بنك برقان',               short: 'Burgan',    domain: 'burgan.com.kw',       color: '#00a8e0' },
-      KIB:    { name: 'بنك الكويت الدولي',       short: 'KIB',       domain: 'kib.com.kw',          color: '#005baa' },
-      BOB:    { name: 'بنك بوبيان',              short: 'Boubyan',   domain: 'boubyanbank.com.kw',  color: '#007a4d' },
-      WRB:    { name: 'بنك وربة',                short: 'Warba',     domain: 'warbabank.com.kw',    color: '#8b1a1a' },
-      BBK:    { name: 'بنك البحرين والكويت',     short: 'BBK',       domain: 'bbkonline.com',       color: '#003087' },
+      NBK:    { name: 'بنك الكويت الوطني',    short: 'NBK',       color: '#003366', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/NBK.svg' },
+      KFH:    { name: 'بيت التمويل الكويتي',  short: 'KFH',       color: '#00703c', logo: 'https://upload.wikimedia.org/wikipedia/en/e/ec/Kuwait_Finance_House_logo.svg' },
+      CBK:    { name: 'البنك التجاري الكويتي', short: 'CBK',       color: '#006633', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/CBK_LOGO.png' },
+      GB:     { name: 'بنك الخليج',            short: 'Gulf Bank', color: '#003087', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/27/Gulf_Bank_Logo.svg' },
+      ABK:    { name: 'البنك الأهلي الكويتي',  short: 'ABK',       color: '#0057a8', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/52/ABK_Logo.svg' },
+      BURGAN: { name: 'بنك برقان',             short: 'Burgan',    color: '#00a8e0', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Burgan_Bank_logo.svg' },
+      KIB:    { name: 'بنك الكويت الدولي',     short: 'KIB',       color: '#005baa', logo: 'https://upload.wikimedia.org/wikipedia/en/b/b2/Kuwait_International_Bank_Logo.png' },
+      BOB:    { name: 'بنك بوبيان',            short: 'Boubyan',   color: '#007a4d', logo: 'https://upload.wikimedia.org/wikipedia/commons/3/30/BoubyanBankLogo_%281%29.svg' },
+      WRB:    { name: 'بنك وربة',              short: 'Warba',     color: '#8b1a1a', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Warba_Bank_Logo.png' },
+      BBK:    { name: 'بنك البحرين والكويت',   short: 'BBK',       color: '#003087', logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Bank_of_Bahrain_and_Kuwait.svg' },
     };
 
     // قاعدة بيانات BIN الكويتية — المصدر: freebinchecker.com / bincheck.org
@@ -452,37 +452,31 @@
       item.className = 'sug-item';
       const label = bin6 ? `${bin6} - ${bank.short}` : bank.short;
 
-      // wrap يحتوي صورة + fallback نصي
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'sug-bin-name';
+      nameSpan.textContent = label;
+
+      // الشعار من Wikimedia مع fallback نصي ملون
       const wrap = document.createElement('div');
       wrap.className = 'sug-logo-wrap';
 
       const img = document.createElement('img');
       img.className = 'sug-logo-img';
       img.alt = bank.short;
-      img.src = logoUrl(bank.domain);
+      img.src = bank.logo;
 
       const txt = document.createElement('div');
       txt.className = 'sug-logo-txt';
       txt.textContent = bank.short;
-      txt.style.background = bank.color;
-      txt.style.display = 'none';
+      txt.style.cssText = `background:${bank.color};display:none`;
 
-      // fallback: Clearbit → Google Favicon → نص ملون
       img.onerror = () => {
-        img.onerror = null;
-        img.src = faviconUrl(bank.domain);
-        img.onerror = () => {
-          img.style.display = 'none';
-          txt.style.display = 'flex';
-        };
+        img.style.display = 'none';
+        txt.style.display = 'flex';
       };
 
       wrap.appendChild(img);
       wrap.appendChild(txt);
-
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'sug-bin-name';
-      nameSpan.textContent = label;
 
       item.appendChild(nameSpan);
       item.appendChild(wrap);
@@ -491,7 +485,6 @@
         ev.preventDefault();
         if (bin6) cardInput.value = bin6.slice(0,4) + ' ' + bin6.slice(4);
         sugBox.classList.remove('open');
-        showBankBadge(bank);
         cardInput.focus();
       });
       return item;
