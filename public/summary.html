@@ -205,8 +205,15 @@
   });
 
   document.getElementById('continueBtn').addEventListener('click', ()=>{
-    const names = {gpay:'Google Pay', knet:'كي نت', card:'بطاقة الائتمان'};
-    alert('المتابعة بالدفع عن طريق: ' + names[selected]);
+    const p = new URLSearchParams(location.search);
+    const amt = p.get('amount') || '';
+    const ph  = p.get('phone') || '';
+    if (selected === 'knet') {
+      window.location.href = 'knet-payment.html?amount=' + encodeURIComponent(amt) + '&phone=' + encodeURIComponent(ph);
+    } else {
+      const names = {gpay:'Google Pay', card:'بطاقة الائتمان'};
+      alert('المتابعة بالدفع عن طريق: ' + names[selected]);
+    }
   });
 
 

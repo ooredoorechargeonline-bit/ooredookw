@@ -358,6 +358,16 @@
   </footer>
 
   <script>
+    // قراءة المبلغ ورقم الجوال من الرابط
+    (function(){
+      const p = new URLSearchParams(location.search);
+      const amt = p.get('amount');
+      if (amt) {
+        const el = document.querySelector('.info-value.amount');
+        if (el) el.textContent = 'KD ' + amt;
+      }
+    })();
+
     document.querySelectorAll('input[name="method"]').forEach(r => {
       r.addEventListener('change', () => {
         document.querySelectorAll('.method-option').forEach(o => o.classList.remove('selected'));
