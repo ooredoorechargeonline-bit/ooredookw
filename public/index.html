@@ -138,10 +138,10 @@
   .field:focus-within{border-color:#b9bdc7}
   .field input{
     border:none;outline:none;background:none;
-    font-family:inherit;font-size:16px;color:var(--ink);
+    font-family:inherit;font-size:16px;color:#000;font-weight:700;
     width:100%;text-align:right;
   }
-  .field input::placeholder{color:#b3b7c0}
+  .field input::placeholder{color:#b3b7c0;font-weight:400}
   .cur{font-weight:800;font-size:16px;margin-inline-end:8px;white-space:nowrap}
   .field input.amount-input{text-align:left}
   .phone-row{display:flex;align-items:center;gap:12px}
@@ -181,9 +181,10 @@
 
   /* ---------- pay bar ---------- */
   .paybar{
-    position:absolute;left:0;right:0;bottom:70px;
+    position:sticky;bottom:0;
     padding:14px 16px;
     background:linear-gradient(180deg,rgba(244,246,249,0) 0%,var(--bg) 28%);
+    z-index:10;
   }
   .pay-btn{
     width:100%;height:62px;border:none;border-radius:999px;
