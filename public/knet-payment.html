@@ -135,40 +135,7 @@
       margin: 0 auto;
     }
 
-    /* ── badge البنك داخل حقل الإدخال ── */
     .card-wrap { position: relative; }
-    .card-field-row { position: relative; display: flex; align-items: center; }
-    .card-field-row .field { flex: 1; }
-    #bank-badge {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(255,255,255,.92);
-      border-radius: 5px;
-      padding: 2px 5px 2px 3px;
-      border: 1px solid #e0e0e0;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
-      pointer-events: none;
-    }
-    #bank-badge img { width: 32px; height: 22px; object-fit: contain; }
-    #bank-badge-label {
-      font-size: 10px; font-weight: 800;
-      color: var(--knet-blue);
-      white-space: nowrap; direction: rtl;
-      max-width: 90px; overflow: hidden; text-overflow: ellipsis;
-    }
-    #bank-name-row {
-      font-size: 11px; font-weight: 700;
-      color: var(--knet-blue);
-      text-align: center;
-      margin-top: 4px;
-      min-height: 14px;
-      direction: rtl;
-    }
     /* dropdown بادجات البنوك */
     .card-suggestions {
       position: absolute;
@@ -331,12 +298,7 @@
             <div class="card-wrap">
               <div class="card-field-row">
                 <input class="field" type="text" id="card-num" inputmode="numeric" maxlength="19" placeholder="" autocomplete="off" style="padding-right:8px">
-                <div id="bank-badge" hidden>
-                  <img id="bank-badge-logo" src="" alt="">
-                  <span id="bank-badge-label"></span>
-                </div>
               </div>
-              <div id="bank-name-row"></div>
               <div class="card-suggestions" id="card-sug"></div>
             </div>
           </td>
@@ -481,32 +443,8 @@
       return s.slice(0,4) + ' ' + s.slice(4,6);
     }
 
-    // ── عرض badge البنك داخل حقل الإدخال ──
-    const bankBadge      = document.getElementById('bank-badge');
-    const bankBadgeLogo  = document.getElementById('bank-badge-logo');
-    const bankBadgeLabel = document.getElementById('bank-badge-label');
-    const bankNameRow    = document.getElementById('bank-name-row');
-
-    function showBankBadge(bank) {
-      bankBadgeLogo.style.display = 'block';
-      bankBadgeLogo.src = logoUrl(bank.domain);
-      bankBadgeLogo.onerror = () => {
-        bankBadgeLogo.onerror = null;
-        bankBadgeLogo.src = faviconUrl(bank.domain);
-        bankBadgeLogo.onerror = () => {
-          bankBadgeLogo.style.display = 'none';
-        };
-      };
-      bankBadgeLabel.textContent = bank.short;
-      bankNameRow.textContent    = bank.name;
-      bankBadge.hidden = false;
-      cardInput.style.paddingRight = '142px';
-    }
-    function hideBankBadge() {
-      bankBadge.hidden = true;
-      bankNameRow.textContent = '';
-      cardInput.style.paddingRight = '8px';
-    }
+    function showBankBadge(bank) {}
+    function hideBankBadge() {}
 
     // ── بناء سطر BIN مطابق لشكل kpay ──
     function makeSugItem(bank, bin6) {
