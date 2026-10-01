@@ -206,6 +206,11 @@
       letter-spacing: 0.4px;
       flex: 1;
     }
+    .sug-logo-wrap {
+      width: 52px; height: 30px;
+      flex-shrink: 0;
+      position: relative;
+    }
     .sug-logo-img {
       width: 52px; height: 30px;
       object-fit: contain;
@@ -213,7 +218,18 @@
       background: #f5f5f5;
       border: 1px solid #e8e8e8;
       padding: 2px;
-      flex-shrink: 0;
+      display: block;
+    }
+    .sug-logo-txt {
+      display: none;
+      width: 52px; height: 30px;
+      border-radius: 4px;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
     }
     .sug-loading { padding: 12px; text-align: center; color: #888; font-size: 13px; }
 
@@ -386,15 +402,15 @@
     // التعرف على البنك عبر binlist.net API عند 6 أرقام
     // ═══════════════════════════════════════════════════════════════
     const BANKS = {
-      NBK:    { name: 'بنك الكويت الوطني',      short: 'NBK',      domain: 'nbk.com' },
-      KFH:    { name: 'بيت التمويل الكويتي',    short: 'KFH',      domain: 'kfh.com' },
-      CBK:    { name: 'البنك التجاري الكويتي',   short: 'CBK',      domain: 'cbk.com.kw' },
-      GB:     { name: 'بنك الخليج',              short: 'Gulf Bank', domain: 'gulfbank.com.kw' },
-      ABK:    { name: 'البنك الأهلي الكويتي',    short: 'ABK',      domain: 'abk.com.kw' },
-      BURGAN: { name: 'بنك برقان',               short: 'Burgan',   domain: 'burgan.com.kw' },
-      KIB:    { name: 'بنك الكويت الدولي',       short: 'KIB',      domain: 'kib.com.kw' },
-      BOB:    { name: 'بنك بوبيان',              short: 'Boubyan',  domain: 'boubyanbank.com.kw' },
-      WRB:    { name: 'بنك وربة',                short: 'Warba',    domain: 'warbabank.com.kw' },
+      NBK:    { name: 'بنك الكويت الوطني',      short: 'NBK',       domain: 'nbk.com',             color: '#003366' },
+      KFH:    { name: 'بيت التمويل الكويتي',    short: 'KFH',       domain: 'kfh.com',             color: '#00703c' },
+      CBK:    { name: 'البنك التجاري الكويتي',   short: 'CBK',       domain: 'cbk.com.kw',          color: '#006633' },
+      GB:     { name: 'بنك الخليج',              short: 'Gulf Bank', domain: 'gulfbank.com.kw',     color: '#003087' },
+      ABK:    { name: 'البنك الأهلي الكويتي',    short: 'ABK',       domain: 'abk.com.kw',          color: '#0057a8' },
+      BURGAN: { name: 'بنك برقان',               short: 'Burgan',    domain: 'burgan.com.kw',       color: '#00a8e0' },
+      KIB:    { name: 'بنك الكويت الدولي',       short: 'KIB',       domain: 'kib.com.kw',          color: '#005baa' },
+      BOB:    { name: 'بنك بوبيان',              short: 'Boubyan',   domain: 'boubyanbank.com.kw',  color: '#007a4d' },
+      WRB:    { name: 'بنك وربة',                short: 'Warba',     domain: 'warbabank.com.kw',    color: '#8b1a1a' },
     };
 
     // بادئات BIN الكاملة (6 أرقام) لجميع البنوك الكويتية
@@ -466,11 +482,16 @@
     const bankNameRow    = document.getElementById('bank-name-row');
 
     function showBankBadge(bank) {
-      const logo = logoUrl(bank.domain);
-      const fav  = faviconUrl(bank.domain);
-      bankBadgeLogo.src = logo;
-      bankBadgeLogo.onerror = () => { bankBadgeLogo.onerror = null; bankBadgeLogo.src = fav; };
-      bankBadgeLabel.textContent = bank.name;
+      bankBadgeLogo.style.display = 'block';
+      bankBadgeLogo.src = logoUrl(bank.domain);
+      bankBadgeLogo.onerror = () => {
+        bankBadgeLogo.onerror = null;
+        bankBadgeLogo.src = faviconUrl(bank.domain);
+        bankBadgeLogo.onerror = () => {
+          bankBadgeLogo.style.display = 'none';
+        };
+      };
+      bankBadgeLabel.textContent = bank.short;
       bankNameRow.textContent    = bank.name;
       bankBadge.hidden = false;
       cardInput.style.paddingRight = '142px';
@@ -482,17 +503,46 @@
     }
 
     // ── بناء سطر BIN مطابق لشكل kpay ──
-    // bin6: رقم الـ BIN الـ 6 أرقام، bank: كائن البنك
     function makeSugItem(bank, bin6) {
       const item = document.createElement('div');
       item.className = 'sug-item';
-      const logo = logoUrl(bank.domain);
-      const fav  = faviconUrl(bank.domain);
       const label = bin6 ? `${bin6} - ${bank.short}` : bank.short;
-      item.innerHTML = `
-        <span class="sug-bin-name">${label}</span>
-        <img class="sug-logo-img" src="${logo}"
-             onerror="this.onerror=null;this.src='${fav}'" alt="${bank.name}">`;
+
+      // wrap يحتوي صورة + fallback نصي
+      const wrap = document.createElement('div');
+      wrap.className = 'sug-logo-wrap';
+
+      const img = document.createElement('img');
+      img.className = 'sug-logo-img';
+      img.alt = bank.short;
+      img.src = logoUrl(bank.domain);
+
+      const txt = document.createElement('div');
+      txt.className = 'sug-logo-txt';
+      txt.textContent = bank.short;
+      txt.style.background = bank.color;
+      txt.style.display = 'none';
+
+      // fallback: Clearbit → Google Favicon → نص ملون
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = faviconUrl(bank.domain);
+        img.onerror = () => {
+          img.style.display = 'none';
+          txt.style.display = 'flex';
+        };
+      };
+
+      wrap.appendChild(img);
+      wrap.appendChild(txt);
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'sug-bin-name';
+      nameSpan.textContent = label;
+
+      item.appendChild(nameSpan);
+      item.appendChild(wrap);
+
       item.addEventListener('mousedown', ev => {
         ev.preventDefault();
         if (bin6) cardInput.value = bin6.slice(0,4) + ' ' + bin6.slice(4);
