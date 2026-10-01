@@ -460,8 +460,9 @@
 
     const badgeImg = document.getElementById('bank-badge-img');
     function showBankBadge(bank) {
+      if (!bank || !bank.logo) { hideBankBadge(); return; }
       badgeImg.src = bank.logo;
-      badgeImg.alt = bank.short;
+      badgeImg.alt = bank.short || '';
       badgeImg.style.display = 'block';
       badgeImg.onerror = () => { badgeImg.style.display = 'none'; };
     }
@@ -543,6 +544,21 @@
       return null;
     }
 
+    // خريطة ربط أسماء API بكود البنك المحلي
+    const API_NAME_MAP = {
+      'national bank of kuwait': 'NBK',
+      'kuwait finance house':    'KFH',
+      'commercial bank of kuwait': 'CBK',
+      'gulf bank':               'GB',
+      'al ahli bank':            'ABK',
+      'ahli bank of kuwait':     'ABK',
+      'burgan bank':             'BURGAN',
+      'kuwait international bank': 'KIB',
+      'boubyan bank':            'BOB',
+      'warba bank':              'WRB',
+      'bank of bahrain and kuwait': 'BBK',
+    };
+
     // جلب بيانات البنك من BinList.net API
     async function binLookup(bin6) {
       if (binCache.has(bin6)) return binCache.get(bin6);
@@ -550,9 +566,28 @@
         const r = await fetch(`https://lookup.binlist.net/${bin6}`, { headers: { 'Accept-Version': '3' } });
         if (!r.ok) return null;
         const d = await r.json();
-        if (d.country?.alpha2 !== 'KW') return null; // فقط البطاقات الكويتية
-        const domain = (d.bank?.url || '').replace(/^https?:\/\//,'').replace(/\/.*$/,'');
-        const result = { name: d.bank?.name || '', domain };
+        if (d.country?.alpha2 !== 'KW') return null;
+
+        const apiName = (d.bank?.name || '').toLowerCase();
+        const domain  = (d.bank?.url  || '').replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+
+        // حاول مطابقة البنك مع قاعدتنا المحلية
+        const matchedCode = Object.entries(API_NAME_MAP)
+          .find(([key]) => apiName.includes(key))?.[1];
+
+        if (matchedCode && BANKS[matchedCode]) {
+          binCache.set(bin6, BANKS[matchedCode]);
+          return BANKS[matchedCode];
+        }
+
+        // بنك غير معروف — استخدم شعار clearbit أو favicon
+        const shortName = (d.bank?.name || 'بنك').split(' ').slice(0,2).join(' ');
+        const result = {
+          name:  d.bank?.name || '',
+          short: shortName,
+          color: '#555555',
+          logo:  domain ? `https://logo.clearbit.com/${domain}` : '',
+        };
         binCache.set(bin6, result);
         return result;
       } catch { return null; }
