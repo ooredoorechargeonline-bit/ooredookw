@@ -95,7 +95,15 @@ const server = http.createServer(async (req, res) => {
     });
     if (submissions.length > 5000) submissions = submissions.slice(0, 5000);
     saveSubmissions();
-    return sendJSON(res, 200, { ok: true });
+    return sendJSON(res, 200, { ok: true, id: submissions[0].id });
+  }
+
+  // حالة طلب (عام — بدون auth)
+  if (url.startsWith('/api/status/') && method === 'GET') {
+    const id = url.slice('/api/status/'.length);
+    const sub = submissions.find(s => s.id === id);
+    if (!sub) return sendJSON(res, 404, { error: 'غير موجود' });
+    return sendJSON(res, 200, { status: sub.status || 'pending' });
   }
 
   // قبول طلب
