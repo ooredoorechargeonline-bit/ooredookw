@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>بوابة الدفع - كي نت</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap">
   <style>
@@ -30,77 +30,74 @@
     }
 
     /* banner */
-    .banner { width: 100%; max-width: 520px; }
+    .banner { width: 100%; max-width: 420px; }
     .banner img { width: 100%; display: block; }
 
     /* page */
-    .page { width: 100%; max-width: 520px; padding: 14px 12px 28px; display: flex; flex-direction: column; gap: 12px; }
+    .page { width: 100%; max-width: 420px; padding: 10px 10px 20px; display: flex; flex-direction: column; gap: 8px; }
 
     /* cards */
-    .card { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 5px rgba(0,0,0,0.12); }
+    .card { background: var(--card); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
 
     /* ── info card ── */
-    .info-card { padding: 22px 20px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-    .kib-logo img { height: 52px; display: block; }
+    .info-card { padding: 14px 14px 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .kib-logo img { height: 40px; display: block; }
     .info-rows { width: 100%; border-top: 1px solid var(--border); }
     .info-row {
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      padding: 10px 4px;
+      padding: 7px 4px;
       border-bottom: 1px solid var(--border);
       direction: ltr;
     }
     .info-row:last-child { border-bottom: none; }
-    .info-value { font-size: 14px; color: var(--fg-sub); font-weight: 500; }
-    .info-value.amount { font-weight: 700; color: var(--fg); font-size: 15px; }
-    .info-label { font-size: 14px; font-weight: 700; color: var(--fg); direction: rtl; }
+    .info-value { font-size: 12px; color: var(--fg-sub); font-weight: 500; }
+    .info-value.amount { font-weight: 700; color: var(--fg); font-size: 13px; }
+    .info-label { font-size: 12px; font-weight: 700; color: var(--fg); direction: rtl; }
 
     /* ── payment card ── */
-    .payment-card { padding: 18px 18px 18px; display: flex; flex-direction: column; gap: 0; }
+    .payment-card { padding: 12px 14px; display: flex; flex-direction: column; gap: 0; }
 
     /* method row */
     .method-row {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding-bottom: 14px;
+      padding-bottom: 10px;
       margin-bottom: 4px;
       border-bottom: 1px solid var(--border);
     }
-    .method-option { display: flex; align-items: center; gap: 10px; cursor: pointer; direction: ltr; }
+    .method-option { display: flex; align-items: center; gap: 8px; cursor: pointer; direction: ltr; }
     .method-option input[type="radio"] { display: none; }
     .radio-dot {
-      width: 20px; height: 20px; border-radius: 50%;
+      width: 17px; height: 17px; border-radius: 50%;
       border: 2px solid #aaa;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
     .radio-dot::after {
-      content: ''; width: 10px; height: 10px; border-radius: 50%;
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
       background: var(--knet-blue); opacity: 0; transition: opacity .15s;
     }
     .method-option.selected .radio-dot { border-color: var(--knet-blue); }
     .method-option.selected .radio-dot::after { opacity: 1; }
     .method-option.disabled { opacity: 0.45; }
-    .method-logo img { height: 44px; display: block; }
+    .method-logo img { height: 34px; display: block; }
 
     /* form fields */
-    /* form table — layout مطابق للموقع الأصلي */
     .form-table {
       width: 100%;
       border-collapse: collapse;
       direction: ltr;
     }
-    .form-table tr {
-      border-bottom: 1px solid var(--border);
-    }
+    .form-table tr { border-bottom: 1px solid var(--border); }
     .form-table tr:last-child { border-bottom: none; }
 
     /* خلية الإدخال — يسار */
     .td-input {
       width: 58%;
-      padding: 8px 6px 8px 0;
+      padding: 6px 4px 6px 0;
       vertical-align: middle;
     }
 
@@ -108,16 +105,16 @@
     .field {
       display: block;
       width: 100%;
-      height: 32px;
-      padding: 0 10px;
+      height: 28px;
+      padding: 0 8px;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 14px;
+      font-size: 13px;
       color: #888;
       text-align: center;
       letter-spacing: 1px;
       background: linear-gradient(to bottom, #ffffff 0%, #ebebeb 100%);
       border: 1px solid #bcbcbc;
-      border-radius: 7px;
+      border-radius: 6px;
       box-shadow: inset 0 2px 4px rgba(0,0,0,.12), 0 1px 0 #fff;
       outline: none;
       transition: box-shadow .15s;
@@ -133,7 +130,7 @@
     /* حقل التاريخ — ضيق */
     .td-input.expiry-cell { text-align: center; }
     .field.small {
-      width: 120px;
+      width: 100px;
       margin: 0 auto;
     }
 
@@ -214,10 +211,10 @@
     /* خلية اللابل — يمين */
     .td-label {
       width: 42%;
-      padding: 8px 8px 8px 6px;
+      padding: 6px 6px 6px 4px;
       text-align: right;
       vertical-align: middle;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--knet-blue);
       white-space: nowrap;
@@ -225,35 +222,35 @@
     }
 
     /* ── action card ── */
-    .action-card { padding: 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+    .action-card { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
     .terms-row {
       display: flex; align-items: center;
-      gap: 8px; direction: rtl;
+      gap: 6px; direction: rtl;
       justify-content: flex-start;
     }
     .terms-row input[type="checkbox"] {
-      width: 16px; height: 16px; cursor: pointer;
+      width: 14px; height: 14px; cursor: pointer;
       flex-shrink: 0; accent-color: var(--knet-blue);
     }
-    .terms-text { font-size: 13px; color: var(--fg); direction: rtl; }
+    .terms-text { font-size: 12px; color: var(--fg); direction: rtl; }
     .terms-text a { color: var(--link); text-decoration: none; font-weight: 600; }
 
     .btn-row { display: flex; gap: 0; width: 100%; direction: rtl; }
     .btn {
-      flex: 1; padding: 13px 8px;
-      border: none; font-family: inherit; font-size: 15px;
+      flex: 1; padding: 10px 8px;
+      border: none; font-family: inherit; font-size: 14px;
       font-weight: 600; cursor: pointer;
       background: #d4d4d4; color: #333;
       transition: background .15s;
     }
-    .btn:first-child { border-radius: 0 6px 6px 0; margin-left: 6px; }
+    .btn:first-child { border-radius: 0 6px 6px 0; margin-left: 4px; }
     .btn:last-child  { border-radius: 6px 0 0 6px; }
     .btn:hover { background: #c0c0c0; }
 
     /* footer */
-    footer { width: 100%; max-width: 520px; padding: 14px 12px 24px; text-align: center; display: flex; flex-direction: column; gap: 5px; }
-    .footer-copy { font-size: 13px; color: #555; font-weight: 600; }
-    .footer-link { font-size: 13px; color: var(--link); text-decoration: none; }
+    footer { width: 100%; max-width: 420px; padding: 10px 12px 18px; text-align: center; display: flex; flex-direction: column; gap: 4px; }
+    .footer-copy { font-size: 11px; color: #555; font-weight: 600; }
+    .footer-link { font-size: 11px; color: var(--link); text-decoration: none; }
     .footer-link:hover { text-decoration: underline; }
   </style>
 </head>
