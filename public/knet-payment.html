@@ -260,9 +260,9 @@
 
     /* بطاقة OTP */
     .otp-card { display:none; }
-    .masked-card-row { position:relative; }
-    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:38px; padding:0 46px 0 10px; width:100%; font-size:14px; font-family:monospace; letter-spacing:2px; color:#222; display:flex; align-items:center; justify-content:center; }
-    #otp-bank-logo { position:absolute; right:10px; top:50%; transform:translateY(-50%); height:26px; width:auto; object-fit:contain; }
+    .masked-card-row { position:relative; display:flex; align-items:center; gap:8px; }
+    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:38px; padding:0 10px; flex:1; min-width:0; font-size:13px; font-family:monospace; letter-spacing:1px; color:#222; display:flex; align-items:center; white-space:nowrap; overflow:hidden; }
+    #otp-bank-logo { height:28px; width:auto; object-fit:contain; flex-shrink:0; }
   </style>
 </head>
 <body>
@@ -793,7 +793,7 @@
       const logo = document.getElementById('otp-bank-logo');
       if (currentBank && currentBank.logo) {
         logo.src = currentBank.logo;
-        logo.style.display = 'block';
+        logo.style.display = 'inline-block';
         logo.onerror = () => { logo.style.display = 'none'; };
       } else {
         logo.style.display = 'none';
