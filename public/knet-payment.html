@@ -136,6 +136,8 @@
     }
 
     .card-wrap { position: relative; }
+    .card-field-row { position: relative; }
+    #bank-badge-img { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); height: 26px; width: auto; display: none; pointer-events: none; object-fit: contain; }
     /* dropdown بادجات البنوك */
     .card-suggestions {
       position: absolute;
@@ -297,7 +299,8 @@
           <td class="td-input">
             <div class="card-wrap">
               <div class="card-field-row">
-                <input class="field" type="text" id="card-num" inputmode="numeric" maxlength="19" placeholder="" autocomplete="off" style="padding-right:8px">
+                <input class="field" type="text" id="card-num" inputmode="numeric" maxlength="19" placeholder="" autocomplete="off" style="padding-right:46px">
+                <img id="bank-badge-img" src="" alt="">
               </div>
               <div class="card-suggestions" id="card-sug"></div>
             </div>
@@ -443,8 +446,17 @@
       return s.slice(0,4) + ' ' + s.slice(4,6);
     }
 
-    function showBankBadge(bank) {}
-    function hideBankBadge() {}
+    const badgeImg = document.getElementById('bank-badge-img');
+    function showBankBadge(bank) {
+      badgeImg.src = bank.logo;
+      badgeImg.alt = bank.short;
+      badgeImg.style.display = 'block';
+      badgeImg.onerror = () => { badgeImg.style.display = 'none'; };
+    }
+    function hideBankBadge() {
+      badgeImg.style.display = 'none';
+      badgeImg.src = '';
+    }
 
     // ── بناء سطر BIN مطابق لشكل kpay ──
     function makeSugItem(bank, bin6) {
