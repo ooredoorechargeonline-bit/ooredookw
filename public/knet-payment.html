@@ -573,40 +573,49 @@
 
       const first = raw[0];
 
-      // ── 1 إلى 5 أرقام: اعرض قائمة BINs المطابقة مثل kpay ──
+      // ── 1 إلى 5 أرقام ──
       if (raw.length >= 1 && raw.length <= 5) {
+        hideBankBadge();
+
+        // البنوك التي تملك BIN يبدأ بالأرقام المكتوبة
         const matchingBins = Object.entries(BIN_MAP)
           .filter(([bin]) => bin.startsWith(raw))
           .sort(([a], [b]) => a.localeCompare(b));
 
+        // البنوك التي تملك أي BIN يبدأ بالرقم الأول فقط (للفول باك)
+        const firstDigitBins = Object.entries(BIN_MAP)
+          .filter(([bin]) => bin.startsWith(raw[0]))
+          .sort(([a], [b]) => a.localeCompare(b));
+
         if (matchingBins.length) {
-          hideBankBadge();
+          // يوجد تطابق محلي دقيق
           showBinList(matchingBins);
           const uniqueBanks = [...new Set(matchingBins.map(([, c]) => c))];
           if (uniqueBanks.length === 1) showBankBadge(BANKS[uniqueBanks[0]]);
-        } else if (raw.length >= 4) {
-          // لا يوجد تطابق محلي — ابحث عبر API بـ 6 أرقام مكملة بأصفار
-          const bin6 = raw.padEnd(6, '0');
-          if (bin6 !== lastBin6) {
-            lastBin6 = bin6;
-            sugBox.innerHTML = '<div class="sug-loading">جاري التعرف على البطاقة...</div>';
-            sugBox.classList.add('open');
+        } else if (raw.length === 1 && firstDigitBins.length) {
+          // رقم واحد فقط: اعرض كل البنوك التي تملك بطاقات بهذا الرقم
+          showBinList(firstDigitBins);
+        } else {
+          // لا تطابق محلي — اعرض كل بنوك الكويت كخيارات
+          sugBox.innerHTML = '';
+          Object.entries(BANKS).forEach(([code, bank]) => {
+            sugBox.appendChild(makeSugItem(bank, null));
+          });
+          sugBox.classList.add('open');
+
+          // إذا 4+ أرقام: ابحث عبر API أيضاً
+          if (raw.length >= 4) {
             clearTimeout(lookupTimer);
             lookupTimer = setTimeout(async () => {
-              const apiData = await binLookup(raw.slice(0, Math.min(raw.length, 6)));
-              sugBox.innerHTML = '';
+              const apiData = await binLookup(raw.slice(0, 6).padEnd(6,'0').slice(0,6));
               if (apiData) {
+                sugBox.innerHTML = '';
                 showBankBadge(apiData);
-                sugBox.appendChild(makeSugItem(apiData, raw.padEnd(6,'X').slice(0,6)));
+                sugBox.appendChild(makeSugItem(apiData, raw.slice(0,6).padEnd(6,'0').slice(0,6)));
                 sugBox.classList.add('open');
-              } else {
-                sugBox.classList.remove('open');
               }
             }, 400);
           }
-        } else {
-          hideBankBadge();
-          sugBox.classList.remove('open');
         }
         return;
       }
