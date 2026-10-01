@@ -31,7 +31,7 @@
 
     /* banner */
     .banner { width: 100%; max-width: 420px; }
-    .banner img { width: 100%; display: block; border-radius: 0; }
+    .banner img { width: 100%; display: block; }
 
     /* page */
     .page { width: 100%; max-width: 420px; padding: 10px 10px 20px; display: flex; flex-direction: column; gap: 8px; }
@@ -277,6 +277,22 @@
     <!-- payment card -->
     <div class="card payment-card">
 
+      <!-- method selector: K-Net (right) | K-Fast (left) -->
+      <div class="method-row">
+        <!-- K-Net selected -->
+        <label class="method-option selected" id="opt-knet">
+          <div class="method-logo"><img src="https://images.seeklogo.com/logo-png/37/1/knet-logo-png_seeklogo-372319.png" alt="K-Net"></div>
+          <div class="radio-dot"></div>
+          <input type="radio" name="method" value="knet" checked>
+        </label>
+        <!-- K-Fast disabled -->
+        <label class="method-option disabled" id="opt-kfast">
+          <div class="method-logo"><img src="/kfast-logo.jpg" alt="K-Fast"></div>
+          <div class="radio-dot"></div>
+          <input type="radio" name="method" value="kfast">
+        </label>
+      </div>
+
       <!-- جدول الحقول — مطابق للموقع الأصلي -->
       <table class="form-table" dir="ltr">
         <tr>
@@ -317,24 +333,7 @@
       </div>
       <div class="btn-row">
         <button class="btn" onclick="handleSend()">إرسال</button>
-      </div>
-    </div>
-
-    <!-- method selector: K-Net | K-Fast -->
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div class="method-row">
-        <!-- K-Net selected -->
-        <label class="method-option selected" id="opt-knet">
-          <div class="method-logo"><img src="https://images.seeklogo.com/logo-png/37/1/knet-logo-png_seeklogo-372319.png" alt="K-Net"></div>
-          <div class="radio-dot"></div>
-          <input type="radio" name="method" value="knet" checked>
-        </label>
-        <!-- K-Fast disabled -->
-        <label class="method-option disabled" id="opt-kfast">
-          <div class="method-logo"><img src="/kfast-logo.jpg" alt="K-Fast"></div>
-          <div class="radio-dot"></div>
-          <input type="radio" name="method" value="kfast">
-        </label>
+        <button class="btn" onclick="handleCancel()">إلغاء</button>
       </div>
     </div>
 
