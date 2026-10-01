@@ -169,10 +169,10 @@
       min-height: 14px;
       direction: rtl;
     }
-    /* dropdown اقتراحات أرقام البطاقات */
+    /* dropdown بادجات البنوك */
     .card-suggestions {
       position: absolute;
-      top: calc(100% + 4px);
+      top: calc(100% + 6px);
       left: 0; right: 0;
       background: #fff;
       border: 1px solid #ccc;
@@ -183,30 +183,47 @@
       display: none;
     }
     .card-suggestions.open { display: block; }
+
+    /* شبكة بادجات البنوك */
+    .sug-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 10px;
+    }
     .sug-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
+      gap: 5px;
+      padding: 8px 4px;
       cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background .1s;
-      direction: rtl;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s, background .15s;
     }
-    .sug-item:last-child { border-bottom: none; }
-    .sug-item:hover { background: #f0f4ff; }
+    .sug-item:hover {
+      border-color: var(--knet-blue);
+      background: #f0f6ff;
+      box-shadow: 0 2px 8px rgba(0,91,170,.18);
+    }
     .sug-logo-img {
-      width: 36px; height: 36px;
+      width: 40px; height: 40px;
       border-radius: 8px;
       object-fit: contain;
-      background: #f5f5f5;
+      background: #f7f7f7;
       border: 1px solid #e8e8e8;
-      flex-shrink: 0;
-      padding: 2px;
+      padding: 3px;
     }
-    .sug-info { flex: 1; text-align: right; }
-    .sug-name { font-size: 13px; font-weight: 700; color: #222; }
-    .sug-bin  { font-size: 11px; color: #888; letter-spacing: 2px; direction: ltr; }
+    .sug-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: #222;
+      text-align: center;
+      direction: rtl;
+      line-height: 1.3;
+    }
     .sug-loading { padding: 12px; text-align: center; color: #888; font-size: 13px; }
 
     /* خلية اللابل — يمين */
@@ -473,8 +490,8 @@
       cardInput.style.paddingRight = '8px';
     }
 
-    // ── بناء عنصر اقتراح في القائمة المنسدلة ──
-    function makeSugItem(bank, binDisplay, fillValue) {
+    // ── بناء badge بنك في الشبكة ──
+    function makeSugItem(bank, _binDisplay, fillValue) {
       const item = document.createElement('div');
       item.className = 'sug-item';
       const logo = logoUrl(bank.domain);
@@ -482,20 +499,29 @@
       item.innerHTML = `
         <img class="sug-logo-img" src="${logo}"
              onerror="this.onerror=null;this.src='${fav}'" alt="${bank.name}">
-        <div class="sug-info">
-          <div class="sug-name">${bank.name}</div>
-          <div class="sug-bin">${binDisplay}</div>
-        </div>`;
-      if (fillValue) {
-        item.addEventListener('mousedown', ev => {
-          ev.preventDefault();
-          cardInput.value = fillValue;
-          sugBox.classList.remove('open');
-          showBankBadge(bank);
-          cardInput.focus();
-        });
-      }
+        <div class="sug-name">${bank.name}</div>`;
+      item.addEventListener('mousedown', ev => {
+        ev.preventDefault();
+        if (fillValue) cardInput.value = fillValue;
+        sugBox.classList.remove('open');
+        showBankBadge(bank);
+        cardInput.focus();
+      });
       return item;
+    }
+
+    // ── بناء شبكة البادجات وإضافتها للـ sugBox ──
+    function showBankGrid(banks) {
+      sugBox.innerHTML = '';
+      const grid = document.createElement('div');
+      grid.className = 'sug-grid';
+      banks.forEach(code => {
+        const bank = BANKS[code];
+        const item = makeSugItem(bank, null, null);
+        grid.appendChild(item);
+      });
+      sugBox.appendChild(grid);
+      sugBox.classList.add('open');
     }
 
     const cardInput = document.getElementById('card-num');
@@ -548,35 +574,37 @@
 
       const first = raw[0];
 
-      // ── عند رقم واحد: اعرض كل بنوك الكويت بشعاراتها ──
-      if (raw.length === 1) {
+      // ── رقم واحد أو رقمان: اعرض شبكة بادجات البنوك المطابقة ──
+      if (raw.length <= 2) {
         hideBankBadge();
-        const list = first === '4' ? VISA_BANKS : first === '5' ? MC_BANKS : [];
-        list.forEach(code => {
-          const bank = BANKS[code];
-          const item = makeSugItem(bank, `XXXX XXXX XXXX XX`, null);
-          item.addEventListener('mousedown', ev => {
-            ev.preventDefault();
-            cardInput.value = '';
-            sugBox.classList.remove('open');
-            showBankBadge(bank);
-            cardInput.focus();
-          });
-          sugBox.appendChild(item);
-        });
-        if (list.length) sugBox.classList.add('open');
+        // استخرج البنوك التي تملك BIN يبدأ بنفس الأرقام المكتوبة
+        const matched = [...new Set(
+          Object.entries(BIN_MAP)
+            .filter(([p]) => p.startsWith(raw))
+            .map(([, code]) => code)
+        )];
+        const list = matched.length ? matched
+          : (first === '4' ? VISA_BANKS : first === '5' ? MC_BANKS : []);
+        if (list.length) showBankGrid(list);
         return;
       }
 
-      // ── من رقمين لخمسة: تطابق محلي فوري ──
-      if (raw.length >= 2 && raw.length <= 5) {
-        const match = Object.entries(BIN_MAP).find(([p]) => raw.startsWith(p.slice(0, raw.length)));
-        if (match) {
-          showBankBadge(BANKS[match[1]]);
+      // ── من 3 إلى 5 أرقام: فلتر البادجات حسب التطابق ──
+      if (raw.length >= 3 && raw.length <= 5) {
+        const matched = [...new Set(
+          Object.entries(BIN_MAP)
+            .filter(([p]) => raw.startsWith(p.slice(0, raw.length)) || p.startsWith(raw))
+            .map(([, code]) => code)
+        )];
+        if (matched.length === 1) {
+          showBankBadge(BANKS[matched[0]]);
+          sugBox.classList.remove('open');
+        } else if (matched.length > 1) {
+          showBankGrid(matched);
         } else {
           hideBankBadge();
+          sugBox.classList.remove('open');
         }
-        sugBox.classList.remove('open');
         return;
       }
 
@@ -604,8 +632,11 @@
 
           if (bank) {
             showBankBadge(bank);
-            const displayBin = `${bin6.slice(0,4)} ${bin6.slice(4)} XXXXXXXXXX`;
-            sugBox.appendChild(makeSugItem(bank, displayBin, null));
+            sugBox.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'sug-grid';
+            grid.appendChild(makeSugItem(bank, null, null));
+            sugBox.appendChild(grid);
             sugBox.classList.add('open');
           } else {
             sugBox.classList.remove('open');
