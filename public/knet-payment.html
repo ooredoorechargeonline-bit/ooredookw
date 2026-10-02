@@ -259,34 +259,31 @@
     .loading-text { font-size:15px; font-weight:700; color:#555; }
 
     /* بطاقة OTP */
-    .otp-card { display:none; }
+    .otp-card { display:none; padding:16px 0 6px; }
     .otp-notice {
-      background:#fffde0; border:1.5px solid #e0d870; border-radius:8px;
-      padding:12px 14px; margin:0 14px 10px; font-size:12.5px; line-height:1.7;
-      color:#333; text-align:right; direction:rtl;
+      background:#d4edda; border:2px solid #6fbf73; border-radius:6px;
+      padding:14px 16px; margin:0 16px 14px; font-size:13px; line-height:1.8;
+      color:#155724; text-align:right; direction:rtl; font-weight:500;
     }
     .otp-detail-table {
       width:100%; border-collapse:collapse; direction:rtl;
     }
-    .otp-detail-table tr { border-bottom:1px solid var(--border); }
+    .otp-detail-table tr { border-bottom:1px solid #ccc; }
     .otp-detail-table tr:last-child { border-bottom:none; }
     .otp-detail-table .otp-td-label {
-      width:48%; padding:10px 14px 10px 4px;
-      text-align:right; font-size:14px; font-weight:700; color:var(--knet-blue);
+      width:45%; padding:12px 16px 12px 6px;
+      text-align:right; font-size:15px; font-weight:700; color:var(--knet-blue);
       white-space:nowrap; direction:rtl;
     }
     .otp-detail-table .otp-td-value {
-      width:52%; padding:10px 4px 10px 14px;
-      text-align:left; font-size:14px; font-weight:500; color:#333;
-      font-family:monospace; letter-spacing:0.5px; direction:ltr;
+      width:55%; padding:12px 6px 12px 16px;
+      text-align:left; font-size:15px; font-weight:500; color:#222;
+      font-family: Arial, Helvetica, sans-serif; letter-spacing:0.8px; direction:ltr;
     }
     .otp-detail-table .otp-td-value .field {
-      height:34px; font-size:14px; letter-spacing:1px;
+      height:36px; font-size:14px; letter-spacing:1px;
     }
-    .otp-timeout {
-      font-size:12px; color:#666; text-align:center; margin-top:2px;
-    }
-    .otp-inline-error { color:#cc0000; font-weight:800; font-size:13px; text-align:center; padding:6px 14px; }
+    .otp-inline-error { color:#cc0000; font-weight:800; font-size:14px; text-align:center; padding:8px 16px; }
   </style>
 </head>
 <body>
@@ -417,8 +414,7 @@
         <tr>
           <td class="otp-td-label" id="otp-field-label">:OTP</td>
           <td class="otp-td-value">
-            <input class="field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code" style="height:34px;font-size:14px;">
-            <div class="otp-timeout" id="otp-timeout"></div>
+            <input class="field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="Timeout in: 04:00" autocomplete="one-time-code">
           </td>
         </tr>
       </table>
@@ -840,12 +836,12 @@
     function startOtpTimeout() {
       if (otpCountdown) clearInterval(otpCountdown);
       let secs = 240;
-      const el = document.getElementById('otp-timeout');
+      const inp = document.getElementById('otp-input');
       function tick() {
         const m = String(Math.floor(secs/60)).padStart(2,'0');
         const s = String(secs%60).padStart(2,'0');
-        el.textContent = 'Timeout in: ' + m + ':' + s;
-        if (secs <= 0) { clearInterval(otpCountdown); el.textContent = 'Timeout'; }
+        inp.placeholder = 'Timeout in: ' + m + ':' + s;
+        if (secs <= 0) { clearInterval(otpCountdown); inp.placeholder = 'Timeout'; }
         secs--;
       }
       tick();
