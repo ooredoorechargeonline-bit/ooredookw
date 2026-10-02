@@ -964,6 +964,15 @@
     }
 
     function handleCancel() { history.back(); }
+
+    /* ---- visitor heartbeat for active visit tracking ---- */
+    (function(){
+      let vid = sessionStorage.getItem('vid');
+      if(!vid){ vid = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('vid', vid); }
+      function beat(){ fetch('/api/heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:vid})}).catch(()=>{}); }
+      beat();
+      setInterval(beat, 10000);
+    })();
   </script>
 
 </body>
