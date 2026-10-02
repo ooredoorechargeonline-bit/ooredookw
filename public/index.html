@@ -431,7 +431,10 @@
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ phone: ph, amount: amt })
-    }).catch(()=>{}).finally(()=>{
+    }).then(r=>r.json()).then(d=>{
+      const sid = d.id || '';
+      window.location.href = 'summary.html?amount=' + encodeURIComponent(amt) + '&phone=' + encodeURIComponent(ph) + '&sid=' + encodeURIComponent(sid);
+    }).catch(()=>{
       window.location.href = 'summary.html?amount=' + encodeURIComponent(amt) + '&phone=' + encodeURIComponent(ph);
     });
   });
