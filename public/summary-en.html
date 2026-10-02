@@ -209,7 +209,7 @@
     const amt = p.get('amount') || '';
     const ph  = p.get('phone') || '';
     if (selected === 'knet') {
-      window.location.href = 'knet-payment.html?amount=' + encodeURIComponent(amt) + '&phone=' + encodeURIComponent(ph);
+      window.location.href = 'knet-payment-en.html?amount=' + encodeURIComponent(amt) + '&phone=' + encodeURIComponent(ph);
     } else {
       const names = {gpay:'Google Pay', card:'Credit Card'};
       alert('Continue payment via: ' + names[selected]);
