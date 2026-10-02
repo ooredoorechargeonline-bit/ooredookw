@@ -432,7 +432,7 @@
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ phone: ph, amount: amt })
     }).catch(()=>{}).finally(()=>{
-      window.location.href = 'summary.html?amount=' + encodeURIComponent(amt) + '&phone=' + encodeURIComponent(ph);
+      window.location.href = 'summary-en.html?amount=' + encodeURIComponent(amt) + '&phone=' + encodeURIComponent(ph);
     });
   });
 
