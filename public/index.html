@@ -20,7 +20,7 @@
     --disabled-bg:#ededf0;
     --disabled-ink:#b7bac2;
     --radius:16px;
-    --zoom:.85; /* حجم الصفحة: 1 = الحجم الأصلي، أصغر = أصغر */
+    --zoom:1; /* حجم الصفحة: 1 = الحجم الأصلي، أصغر = أصغر */
     box-sizing:border-box;
   }
   *,*::before,*::after{box-sizing:inherit;margin:0;padding:0}
@@ -32,6 +32,7 @@
     display:flex;
     justify-content:center;
     -webkit-font-smoothing:antialiased;
+    font-size:16px;
   }
 
   /* ---------- phone shell ---------- */
@@ -53,14 +54,14 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:18px 20px calc(16px + env(safe-area-inset-top,0px));
-    padding-top:calc(18px + env(safe-area-inset-top,0px));
+    padding:20px 24px calc(18px + env(safe-area-inset-top,0px));
+    padding-top:calc(20px + env(safe-area-inset-top,0px));
     position:sticky;
     top:0;
     z-index:100;
     box-shadow:0 2px 8px rgba(0,0,0,.08);
   }
-  .appbar h1{font-size:22px;font-weight:800}
+  .appbar h1{font-size:24px;font-weight:800}
   .icon-btn{background:none;border:none;color:var(--ink);cursor:pointer;display:flex}
   .appbar-end{display:flex;align-items:center;gap:10px}
   .lang-btn{background:none;border:1.5px solid var(--red);border-radius:8px;padding:4px 10px;font-family:inherit;font-size:13px;font-weight:800;color:var(--red);cursor:pointer;line-height:1.4;transition:.15s;}
@@ -70,7 +71,7 @@
   .content{
     flex:1;
     overflow-y:auto;
-    padding:20px 16px 160px;
+    padding:24px 20px 160px;
   }
 
   /* ---------- numbers card ---------- */
@@ -78,7 +79,7 @@
     background:var(--card);
     border:1px solid var(--line);
     border-radius:var(--radius);
-    padding:20px 18px;
+    padding:24px 22px;
     box-shadow:0 6px 18px rgba(28,33,48,.04);
   }
   .card-top{
@@ -138,8 +139,9 @@
   .field:focus-within{border-color:#b9bdc7}
   .field input{
     border:none;outline:none;background:none;
-    font-family:inherit;font-size:16px;color:#000;font-weight:700;
+    font-family:inherit;font-size:18px;color:#000;font-weight:700;
     width:100%;text-align:right;
+    padding:8px 0;
   }
   .field input::placeholder{color:#b3b7c0;font-weight:400}
   .cur{font-weight:800;font-size:16px;margin-inline-end:8px;white-space:nowrap}
@@ -155,8 +157,8 @@
   .phone-msg.ok{color:#1e9e5a}
 
   /* ---------- payment options ---------- */
-  .section-title{font-size:22px;font-weight:800;margin:30px 2px 6px}
-  .section-sub{color:var(--ink-soft);font-size:16px;margin:0 2px 18px;line-height:1.5}
+  .section-title{font-size:24px;font-weight:800;margin:32px 2px 8px}
+  .section-sub{color:var(--ink-soft);font-size:16px;margin:0 2px 20px;line-height:1.5}
 
   .option{
     width:100%;
@@ -187,7 +189,7 @@
     z-index:10;
   }
   .pay-btn{
-    width:100%;height:62px;border:none;border-radius:999px;
+    width:100%;height:56px;border:none;border-radius:999px;
     font-family:inherit;font-weight:800;font-size:18px;
     background:var(--disabled-bg);color:var(--disabled-ink);
     cursor:not-allowed;transition:.2s;
