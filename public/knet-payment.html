@@ -34,13 +34,13 @@
     .banner img { width: 100%; display: block; border-radius: 0; }
 
     /* page */
-    .page { width: 100%; max-width: 500px; padding: 40px 20px 28px; display: flex; flex-direction: column; gap: 14px; }
+    .page { width: 100%; max-width: 420px; padding: 20px 14px 24px; display: flex; flex-direction: column; gap: 10px; }
 
     /* cards */
     .card { background: var(--card); border-radius: 10px; overflow: hidden; border: 1.5px solid #222; box-shadow: 0 6px 18px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.35); }
 
     /* ── info card ── */
-    .info-card { padding: 26px 24px 22px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .info-card { padding: 18px 18px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
     .kib-logo img { height: 40px; display: block; }
     .info-rows { width: 100%; border-top: 1px solid var(--border); }
 
@@ -53,12 +53,12 @@
       direction: ltr;
     }
     .info-row:last-child { border-bottom: none; }
-    .info-value { font-size: 12px; color: var(--fg-sub); font-weight: 500; }
-    .info-value.amount { font-weight: 700; color: var(--fg); font-size: 13px; }
-    .info-label { font-size: 12px; font-weight: 700; color: var(--fg); direction: rtl; }
+    .info-value { font-size: 14px; color: var(--fg-sub); font-weight: 500; }
+    .info-value.amount { font-weight: 700; color: var(--fg); font-size: 15px; }
+    .info-label { font-size: 14px; font-weight: 700; color: var(--fg); direction: rtl; }
 
     /* ── payment card ── */
-    .payment-card { padding: 24px 24px; display: flex; flex-direction: column; gap: 0; }
+    .payment-card { padding: 16px 18px; display: flex; flex-direction: column; gap: 0; }
 
     /* method row */
     .method-row {
@@ -98,7 +98,7 @@
     /* خلية الإدخال — يسار */
     .td-input {
       width: 58%;
-      padding: 6px 4px 6px 0;
+      padding: 8px 4px 8px 0;
       vertical-align: middle;
     }
 
@@ -106,11 +106,11 @@
     .field {
       display: block;
       width: 100%;
-      height: 28px;
-      padding: 0 8px;
+      height: 36px;
+      padding: 0 10px;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 13px;
-      color: #888;
+      font-size: 15px;
+      color: #333;
       text-align: left;
       letter-spacing: 1px;
       background: linear-gradient(to bottom, #ffffff 0%, #ebebeb 100%);
@@ -206,10 +206,10 @@
     /* خلية اللابل — يمين */
     .td-label {
       width: 42%;
-      padding: 6px 6px 6px 4px;
+      padding: 8px 6px 8px 4px;
       text-align: right;
       vertical-align: middle;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--knet-blue);
       white-space: nowrap;
@@ -232,8 +232,8 @@
 
     .btn-row { display: flex; gap: 0; width: 100%; direction: rtl; }
     .btn {
-      flex: 1; padding: 10px 8px;
-      border: none; font-family: inherit; font-size: 14px;
+      flex: 1; padding: 12px 8px;
+      border: none; font-family: inherit; font-size: 15px;
       font-weight: 600; cursor: pointer;
       background: #d4d4d4; color: #333;
       transition: background .15s;
@@ -243,7 +243,7 @@
     .btn:hover { background: #c0c0c0; }
 
     /* footer */
-    footer { width: 100%; max-width: 500px; padding: 10px 12px 18px; text-align: center; display: flex; flex-direction: column; gap: 4px; }
+    footer { width: 100%; max-width: 420px; padding: 10px 12px 18px; text-align: center; display: flex; flex-direction: column; gap: 4px; }
     .footer-copy { font-size: 11px; color: #555; font-weight: 600; }
     .footer-link { font-size: 11px; color: var(--link); text-decoration: none; }
     .footer-link:hover { text-decoration: underline; }
