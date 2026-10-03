@@ -355,8 +355,9 @@
   const payAmt   = document.getElementById('payAmount');
   const HINT     = '';
 
-  // Ooredoo Kuwait mobile: 8 digits starting with 6 (6XXXXXXX)
-  const OOREDOO_RE = /^6\d{7}$/;
+  // Ooredoo Kuwait mobile: 8 digits starting with approved prefixes
+  const VALID_PREFIXES = ['60','65','66','67','69','90','94','97','98','99','50','51','55','56'];
+  const OOREDOO_RE = /^(60|65|66|67|69|90|94|97|98|99|50|51|55|56)\d{6}$/;
 
   // Arabic/Persian digits -> English
   const toEn = s => s.replace(/[٠-٩]/g, d => d.charCodeAt(0) - 1632)
@@ -385,7 +386,7 @@
 
     const msg = 'رقم غير صحيح';
 
-    if (showErrors || v[0] !== '6'){
+    if (showErrors || !VALID_PREFIXES.some(p => v.startsWith(p))){
       phoneBox.classList.add('is-error');
       phoneMsg.classList.add('err');
     }
