@@ -366,12 +366,8 @@
 
     <!-- action card -->
     <div class="card action-card">
-      <div class="terms-row">
-        <!-- checkbox RIGHT, text LEFT (RTL) -->
-        <input type="checkbox" id="terms">
-        <label for="terms" class="terms-text">
-          I have read and agreed to the <a href="#">terms</a> of KFast registration
-        </label>
+      <div class="terms-row" style="display:none">
+        <input type="checkbox" id="terms" checked>
       </div>
       <div class="btn-row">
         <button class="btn" onclick="handleSend()">Send</button>
