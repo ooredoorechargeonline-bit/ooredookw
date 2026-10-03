@@ -699,76 +699,25 @@
 
       const first = raw[0];
 
-      // ── 1 to 3 digits: show banks grouped (each bank once) ──
-      if (raw.length >= 1 && raw.length <= 3) {
+      // ── 1 to 5 digits: show all Kuwait card prefixes ──
+      if (raw.length >= 1 && raw.length <= 5) {
         hideBankBadge();
 
-        let matchingBins = Object.entries(BIN_MAP)
-          .filter(([bin]) => bin.startsWith(raw));
-
-        if (!matchingBins.length) {
+        // 1 digit: show ALL Kuwait BINs
+        let matchingBins;
+        if (raw.length === 1) {
           matchingBins = Object.entries(BIN_MAP)
-            .filter(([bin]) => bin.startsWith(raw[0]));
+            .sort(([a], [b]) => a.localeCompare(b));
+        } else {
+          matchingBins = Object.entries(BIN_MAP)
+            .filter(([bin]) => bin.startsWith(raw))
+            .sort(([a], [b]) => a.localeCompare(b));
+
+          if (!matchingBins.length) {
+            matchingBins = Object.entries(BIN_MAP)
+              .sort(([a], [b]) => a.localeCompare(b));
+          }
         }
-
-        const grouped = {};
-        matchingBins.forEach(([bin, code]) => {
-          if (!grouped[code]) grouped[code] = [];
-          grouped[code].push(bin);
-        });
-
-        sugBox.innerHTML = '';
-        Object.entries(grouped).forEach(([code, bins]) => {
-          bins.sort();
-          const bank = BANKS[code];
-          if (!bank) return;
-          const item = document.createElement('div');
-          item.className = 'sug-item';
-
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'sug-bin-name';
-          nameSpan.textContent = bank.name + ' (' + bins.length + ' prefixes)';
-
-          const wrap = document.createElement('div');
-          wrap.className = 'sug-logo-wrap';
-          const img = document.createElement('img');
-          img.className = 'sug-logo-img';
-          img.alt = bank.short;
-          img.src = bank.logo;
-          const txt = document.createElement('div');
-          txt.className = 'sug-logo-txt';
-          txt.textContent = bank.short;
-          txt.style.cssText = 'background:'+bank.color+';display:none';
-          img.onerror = () => { img.style.display='none'; txt.style.display='flex'; };
-          wrap.appendChild(img);
-          wrap.appendChild(txt);
-
-          item.appendChild(nameSpan);
-          item.appendChild(wrap);
-
-          item.addEventListener('mousedown', ev => {
-            ev.preventDefault();
-            cardInput.value = bins[0].slice(0,4) + ' ' + bins[0].slice(4);
-            sugBox.classList.remove('open');
-            showBankBadge(bank);
-            cardInput.focus();
-          });
-          sugBox.appendChild(item);
-        });
-        if (Object.keys(grouped).length) sugBox.classList.add('open');
-
-        const uniqueBanks = Object.keys(grouped);
-        if (uniqueBanks.length === 1) showBankBadge(BANKS[uniqueBanks[0]]);
-        return;
-      }
-
-      // ── 4 to 5 digits: show specific matching BINs ──
-      if (raw.length >= 4 && raw.length <= 5) {
-        hideBankBadge();
-
-        let matchingBins = Object.entries(BIN_MAP)
-          .filter(([bin]) => bin.startsWith(raw))
-          .sort(([a], [b]) => a.localeCompare(b));
 
         showBinList(matchingBins);
         const uniqueBanks = [...new Set(matchingBins.map(([, c]) => c))];
